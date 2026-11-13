@@ -50,6 +50,7 @@ export default function NewQuestPage() {
   const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>(['mars']);
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [durationMinutes, setDurationMinutes] = useState<number>(10);
+  const [bandwidthMode, setBandwidthMode] = useState<'mixed' | 'accessible' | 'challenging'>('mixed');
   const [targetDate, setTargetDate] = useState<string>(
     new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]
   );
@@ -105,6 +106,17 @@ export default function NewQuestPage() {
     }
     return distinctSelectedCategories[0] || 'Planetary Science';
   }, [distinctSelectedCategories]);
+
+  // Compute difficulty bandwidth distribution for review stage
+  const difficultyStats = useMemo(() => {
+    if (!generatedQuest) return { easy: 0, medium: 0, hard: 0, veryHard: 0 };
+    return {
+      easy: generatedQuest.questions.filter((q) => q.difficulty === 'Easy').length,
+      medium: generatedQuest.questions.filter((q) => q.difficulty === 'Medium').length,
+      hard: generatedQuest.questions.filter((q) => q.difficulty === 'Hard').length,
+      veryHard: generatedQuest.questions.filter((q) => q.difficulty === 'Very Difficult').length,
+    };
+  }, [generatedQuest]);
 
   // Filter objects based on active tab and search query
   const filteredObjects = useMemo(() => {
@@ -183,6 +195,7 @@ export default function NewQuestPage() {
           questionCount,
           durationMinutes,
           targetDate,
+          bandwidthMode,
         }),
       });
 
@@ -220,6 +233,7 @@ export default function NewQuestPage() {
       id: `manual_q_${Date.now()}_${newIdx}`,
       orderIndex: newIdx,
       archetype: 'Custom Question',
+      difficulty: 'Easy',
       text: 'New Astronomy Question Prompt',
       explanation: 'Explanation for correct answer.',
       interestingFact: 'Fascinating space trivia.',
@@ -517,7 +531,7 @@ export default function NewQuestPage() {
               </div>
 
               {/* Parameters Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/[0.08]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/[0.08]">
                 {/* Number of Questions */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5 font-mono">
@@ -533,6 +547,23 @@ export default function NewQuestPage() {
                     <option value={5}>5 Questions (Standard Weekly)</option>
                     <option value={8}>8 Questions (Deep Dive)</option>
                     <option value={10}>10 Questions (Mastery Quest)</option>
+                  </select>
+                </div>
+
+                {/* Difficulty Bandwidth */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5 font-mono">
+                    <Layers className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Difficulty Bandwidth</span>
+                  </label>
+                  <select
+                    value={bandwidthMode}
+                    onChange={(e) => setBandwidthMode(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] text-white text-sm focus:border-blue-500 outline-none"
+                  >
+                    <option value="mixed">Dynamic Mix (Easy ➔ Very Hard)</option>
+                    <option value="accessible">Accessible (Mostly Easy & Medium)</option>
+                    <option value="challenging">Challenging (Hard ➔ Very Hard)</option>
                   </select>
                 </div>
 
@@ -752,18 +783,42 @@ export default function NewQuestPage() {
 
             {/* Questions Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-bold text-white tracking-tight">Synthesized Quest Questions</h3>
                   <span className="px-3 py-0.5 rounded-full bg-blue-600/20 text-blue-300 font-mono text-xs border border-blue-500/40 shadow-sm">
-                    {generatedQuest.questions.length} Items · Distinct Archetypes
+                    {generatedQuest.questions.length} Items
                   </span>
+
+                  {/* Difficulty Bandwidth Meter */}
+                  <div className="flex flex-wrap items-center gap-1.5 ml-1">
+                    {difficultyStats.easy > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[10px] font-mono">
+                        🌱 {difficultyStats.easy} Easy
+                      </span>
+                    )}
+                    {difficultyStats.medium > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-300 text-[10px] font-mono">
+                        ⚡ {difficultyStats.medium} Medium
+                      </span>
+                    )}
+                    {difficultyStats.hard > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-violet-950/60 border border-violet-500/40 text-violet-300 text-[10px] font-mono">
+                        🔥 {difficultyStats.hard} Hard
+                      </span>
+                    )}
+                    {difficultyStats.veryHard > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/40 text-rose-300 text-[10px] font-mono">
+                        💀 {difficultyStats.veryHard} Very Hard
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleAddBlankQuestion}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.1] hover:border-blue-500/50 text-blue-300 hover:text-white text-xs font-medium transition-colors"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.1] hover:border-blue-500/50 text-blue-300 hover:text-white text-xs font-medium transition-colors self-start sm:self-auto"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Manual Question</span>

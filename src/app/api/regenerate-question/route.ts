@@ -10,7 +10,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { category, selectedObjectIds, existingQuestionTexts = [], orderIndex = 1 } = await req.json();
+    const { 
+      category, 
+      selectedObjectIds, 
+      existingQuestionTexts = [], 
+      orderIndex = 1,
+      difficulty,
+    } = await req.json();
 
     const { data: objects } = await supabase
       .from('CelestialObjects')
@@ -30,7 +36,7 @@ export async function POST(req: NextRequest) {
     if (topicIds.length > 0) {
       const { data: discs } = await supabase
         .from('Discoveries')
-        .select('title, body')
+        .select('title, body, subtitle, curiosityTitle, curiositySubtitle')
         .in('topicId', topicIds)
         .limit(40);
       discoveries = discs || [];
@@ -42,6 +48,7 @@ export async function POST(req: NextRequest) {
       discoveries,
       existingQuestionTexts,
       orderIndex,
+      difficulty,
     });
 
     return NextResponse.json({ question });

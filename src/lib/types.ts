@@ -67,6 +67,8 @@ export interface DBDiscovery {
 }
 
 // UI Draft Types
+export type QuestionDifficulty = 'Easy' | 'Medium' | 'Hard' | 'Very Difficult';
+
 export interface QuestionOptionDraft {
   id: string;
   prefix: 'A' | 'B' | 'C' | 'D';
@@ -81,6 +83,7 @@ export interface QuestionDraft {
   explanation: string;
   interestingFact: string;
   archetype?: string;
+  difficulty?: QuestionDifficulty;
   options: QuestionOptionDraft[];
 }
 

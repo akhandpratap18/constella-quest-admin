@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { QuestionDraft, QuestDraft, QuestionOptionDraft } from './types';
+import { QuestionDraft, QuestDraft, QuestionOptionDraft, QuestionDifficulty } from './types';
 
 function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -23,6 +23,7 @@ export interface GenerateQuestParams {
   questionCount: number;
   durationMinutes: number;
   targetDate: string; // ISO or date string
+  bandwidthMode?: 'mixed' | 'accessible' | 'challenging';
 }
 
 export const QUESTION_ARCHETYPES = [
@@ -35,6 +36,65 @@ export const QUESTION_ARCHETYPES = [
   '⏳ Deep Time & Evolution',
   '🧪 Atmospheric Chemistry',
 ];
+
+export function getDifficultyBandwidth(
+  count: number,
+  mode: 'mixed' | 'accessible' | 'challenging' = 'mixed'
+): QuestionDifficulty[] {
+  if (mode === 'accessible') {
+    return Array.from({ length: count }, (_, i) => {
+      const ratio = i / Math.max(1, count - 1);
+      return ratio < 0.65 ? 'Easy' : 'Medium';
+    });
+  }
+
+  if (mode === 'challenging') {
+    return Array.from({ length: count }, (_, i) => {
+      const ratio = i / Math.max(1, count - 1);
+      if (ratio < 0.25) return 'Medium';
+      if (ratio < 0.65) return 'Hard';
+      return 'Very Difficult';
+    });
+  }
+
+  // Default: 'mixed' - balanced bandwidth curve (easy warm-ups -> medium -> hard -> very difficult)
+  if (count <= 3) {
+    const map: QuestionDifficulty[] = ['Easy', 'Medium', 'Hard'];
+    return map.slice(0, count);
+  }
+  if (count === 4) {
+    return ['Easy', 'Medium', 'Hard', 'Very Difficult'];
+  }
+  if (count === 5) {
+    return ['Easy', 'Easy', 'Medium', 'Hard', 'Very Difficult'];
+  }
+  if (count === 6) {
+    return ['Easy', 'Easy', 'Medium', 'Medium', 'Hard', 'Very Difficult'];
+  }
+  if (count === 7) {
+    return ['Easy', 'Easy', 'Medium', 'Medium', 'Hard', 'Hard', 'Very Difficult'];
+  }
+  if (count === 8) {
+    return ['Easy', 'Easy', 'Medium', 'Medium', 'Hard', 'Hard', 'Very Difficult', 'Very Difficult'];
+  }
+
+  return Array.from({ length: count }, (_, i) => {
+    const ratio = i / Math.max(1, count - 1);
+    if (ratio < 0.25) return 'Easy';
+    if (ratio < 0.55) return 'Medium';
+    if (ratio < 0.85) return 'Hard';
+    return 'Very Difficult';
+  });
+}
+
+export function getDifficultyForIndex(
+  orderIndex: number,
+  totalCount: number,
+  mode: 'mixed' | 'accessible' | 'challenging' = 'mixed'
+): QuestionDifficulty {
+  const bandwidth = getDifficultyBandwidth(totalCount, mode);
+  return bandwidth[Math.max(0, Math.min(orderIndex - 1, bandwidth.length - 1))] || 'Medium';
+}
 
 export async function generateFullQuest(params: GenerateQuestParams): Promise<QuestDraft> {
   const openai = getOpenAIClient();
@@ -57,9 +117,10 @@ export async function generateFullQuest(params: GenerateQuestParams): Promise<Qu
   const defaultDateRange = `${startStr} – ${endStr}`;
   const defaultDuration = `~ ${params.durationMinutes} min`;
 
+  const targetDifficulties = getDifficultyBandwidth(params.questionCount, params.bandwidthMode || 'mixed');
+
   if (!openai) {
-    // Intelligent anti-template procedural generator when API key is pending
-    return generateFallbackQuest(params, defaultDateRange, defaultDuration);
+    return generateFallbackQuest(params, defaultDateRange, defaultDuration, targetDifficulties);
   }
 
   const prompt = `
@@ -73,24 +134,42 @@ TARGET SCOPE:
 - Estimated Duration: ${params.durationMinutes} minutes
 - Active Date Range: ${defaultDateRange}
 
-VERIFIED DISCOVERY CORPUS:
+VERIFIED DISCOVERY CORPUS (FROM SUPABASE):
 ${formattedDiscoveries.slice(0, 12000)}
 
 CRITICAL GROUNDING & DATA INTEGRITY MANDATE:
 - 100% EXCLUSIVE SUPABASE SOURCE: All questions, correct answers, scientific explanations, and trivia MUST be strictly and exclusively derived from the VERIFIED DISCOVERY CORPUS provided above.
-- NO OUTSIDE FACTS OR HALLUCINATIONS: Do not introduce external facts, missions, or details that are not directly supported by the corpus text. The quiz must test users purely on the verified discoveries stored in the Constella database.
+- ZERO OUTSIDE FACTS OR HALLUCINATIONS: Do not introduce external facts, missions, or details that are not directly supported by the corpus text. The quiz must test users purely on the verified discoveries stored in the Constella database.
+
+DIFFICULTY BANDWIDTH & CALIBRATION (VITAL MANDATE):
+The user must experience a balanced progression of difficulty bandwidth from accessible warm-up questions to expert challenges.
+For this quest, assign each question the following difficulty progression:
+${targetDifficulties.map((diff, i) => `Question #${i + 1}: ${diff}`).join(', ')}
+
+DIFFICULTY TIER GUIDELINES:
+1. "Easy" Tier (Warm-up / Highly Accessible):
+   - Focus: Prominent observational facts, primary features, major celestial bodies involved, or key timelines stated directly in the discovery title, subtitle, or opening sentences.
+   - Phrasing: Clear, inviting, and straightforward (e.g. "According to discoveries on Mars, which gas giant's early inward migration swept away material and stunted Mars's growth?").
+   - Answer & Distractors: Clean, concise, plausible alternatives that are easy to distinguish without deep physics knowledge (e.g., Jupiter vs Saturn vs Neptune vs Uranus).
+   - Prohibit dense graduate-level jargon or confusing double negatives in Easy questions!
+
+2. "Medium" Tier (Intermediate Comprehension):
+   - Focus: Cause-and-effect relationships, environmental conditions, or comparative traits described in the text.
+   - Phrasing: Asks why or how a specific finding occurred based on the corpus.
+   - Distractors: Scientifically realistic options directly contrasting factors mentioned in the text.
+
+3. "Hard" Tier (Advanced Scientific Insight):
+   - Focus: Deeper physical mechanisms, specific detection methods (spectroscopy, radioactive dating, radar telemetry, orbital resonance), or subtle analytical findings from the corpus.
+   - Phrasing: Thoughtful analytical challenge testing nuanced comprehension of the discovery.
+
+4. "Very Difficult" Tier (Expert Cosmic Analysis):
+   - Focus: Counterintuitive anomalies, complex multi-step interactions, or paradoxes uncovered by the discoveries.
+   - Phrasing: Demanding, rigorous inquiry requiring synthesis of the detailed findings in the text.
 
 CRITICAL UNIQUENESS & DIVERSITY MANDATE:
 - NO COOKIE-CUTTER TEMPLATES: Every single question MUST come up as completely unique in its own right, with its own distinct structure, sentence opening, cognitive angle, and linguistic cadence, even if all questions are derived from the exact same source discovery or object.
 - MULTI-OBJECT / MIXED TOPIC COVERAGE: If multiple objects are specified (${params.selectedObjectNames.join(', ')}), alternate questions across ALL chosen objects and categories so every selected entity is represented in the quest.
-- DIVERSE QUESTION ARCHETYPES: You must rotate through different cognitive lenses for each question:
-  1. Observational Evidence & Instrumentation (e.g. "When spectrometers analyze the reflectance of [Object], what distinct signature...")
-  2. Physical Mechanism & Cause-Effect (e.g. "Why does the interaction between [Process A] and [Process B] prevent...")
-  3. Cosmic Anomaly & Paradox (e.g. "What counterintuitive behavior in [Object]'s thermal profile defied initial models?")
-  4. Comparative Scale & Extremes (e.g. "How does the atmospheric surface density on [Object] compare against terrestrial baselines?")
-  5. Planetary Evolution & Deep Time (e.g. "What isotopic ratios in [Object]'s crust reveal its ancient magnetic dynamo?")
-  6. Spacecraft Telemetry & Exploration (e.g. "Which finding confirmed by radar sounding telemetry established that...")
-- PROHIBITION: DO NOT begin multiple questions with "What is...", "Which of the following...", "What key...", or "According to...". Make every question read like a thoughtfully crafted challenge written by an astrophysicist.
+- DIVERSE QUESTION ARCHETYPES: Rotate through different cognitive lenses (Observational Evidence, Physical Mechanism, Cosmic Paradox, Orbital Dynamics, Geology, Spacecraft Telemetry).
 - ANSWER RANDOMIZATION: Randomly place the correct answer across options A, B, C, and D. Do not default to A. Ensure distractors are scientifically realistic and target genuine misconceptions.
 
 RETURN STRICTLY A JSON OBJECT matching this exact schema:
@@ -102,6 +181,7 @@ RETURN STRICTLY A JSON OBJECT matching this exact schema:
   "questions": [
     {
       "archetype": string,
+      "difficulty": "Easy" | "Medium" | "Hard" | "Very Difficult",
       "text": string,
       "explanation": string,
       "interestingFact": string,
@@ -122,7 +202,7 @@ RETURN STRICTLY A JSON OBJECT matching this exact schema:
       messages: [
         {
           role: 'system',
-          content: 'You are an elite astronomy educator and quiz engineer producing strictly valid JSON for Constella. Every question must be uniquely framed without repetitive stems.',
+          content: 'You are an elite astronomy educator producing strictly valid JSON for Constella. Calibrate question bandwidth smoothly from Easy to Very Difficult, strictly grounded in the database corpus.',
         },
         { role: 'user', content: prompt },
       ],
@@ -135,10 +215,12 @@ RETURN STRICTLY A JSON OBJECT matching this exact schema:
 
     const questions: QuestionDraft[] = (parsed.questions || []).map((q: any, idx: number) => {
       const assignedArchetype = q.archetype || QUESTION_ARCHETYPES[idx % QUESTION_ARCHETYPES.length];
+      const assignedDifficulty = (q.difficulty as QuestionDifficulty) || targetDifficulties[idx] || 'Medium';
       return {
         id: `gen_q_${Date.now()}_${idx + 1}`,
         orderIndex: idx + 1,
         archetype: assignedArchetype,
+        difficulty: assignedDifficulty,
         text: q.text || `Question ${idx + 1}`,
         explanation: q.explanation || 'Scientific explanation based on observational data.',
         interestingFact: q.interestingFact || 'Astronomical research continues to reveal new details about our cosmos.',
@@ -167,7 +249,7 @@ RETURN STRICTLY A JSON OBJECT matching this exact schema:
     };
   } catch (err) {
     console.error('OpenAI generation error:', err);
-    return generateFallbackQuest(params, defaultDateRange, defaultDuration);
+    return generateFallbackQuest(params, defaultDateRange, defaultDuration, targetDifficulties);
   }
 }
 
@@ -177,6 +259,7 @@ export async function regenerateSingleQuestion(params: {
   discoveries: Array<{ title: string; body: string }>;
   existingQuestionTexts: string[];
   orderIndex: number;
+  difficulty?: QuestionDifficulty;
 }): Promise<QuestionDraft> {
   const openai = getOpenAIClient();
 
@@ -185,9 +268,15 @@ export async function regenerateSingleQuestion(params: {
     .join('\n\n');
 
   const archetype = QUESTION_ARCHETYPES[(params.orderIndex - 1) % QUESTION_ARCHETYPES.length];
+  const targetDifficulty: QuestionDifficulty = params.difficulty || getDifficultyForIndex(params.orderIndex, 5);
 
   if (!openai) {
-    return generateFallbackSingleQuestion(params.orderIndex, params.selectedObjectNames[0] || 'Cosmos', params.discoveries[0]);
+    return generateFallbackSingleQuestion(
+      params.orderIndex,
+      params.selectedObjectNames[0] || 'Cosmos',
+      params.discoveries[0],
+      targetDifficulty
+    );
   }
 
   const prompt = `
@@ -195,16 +284,28 @@ You are creating ONE fresh replacement astronomy multiple-choice question for Co
 TARGET OBJECTS: ${params.selectedObjectNames.join(', ')}
 CATEGORY: ${params.category}
 TARGET QUESTION ARCHETYPE: ${archetype}
+TARGET DIFFICULTY TIER: ${targetDifficulty}
+
+DIFFICULTY LEVEL REQUIREMENTS FOR "${targetDifficulty}":
+${
+  targetDifficulty === 'Easy'
+    ? '- Make this question ACCESSIBLE and DIRECT. Test a prominent finding, main feature, or clear timeline directly stated in the corpus. Keep phrasing clean and friendly. Distractors should be clean, clear space concepts that avoid confusing graduate-level jargon.'
+    : targetDifficulty === 'Medium'
+    ? '- Make this an INTERMEDIATE question testing cause-and-effect, environmental characteristics, or comparative planetary traits directly described in the corpus.'
+    : targetDifficulty === 'Hard'
+    ? '- Make this an ADVANCED question exploring specific detection methodology, deep planetary mechanics, or subtle analytical insights from the text.'
+    : '- Make this an EXPERT/VERY DIFFICULT question examining a complex cosmic paradox, anomaly, or multi-step evolutionary puzzle from the corpus.'
+}
 
 EXISTING QUESTIONS IN THIS QUIZ (DO NOT REPEAT OR COVER THE SAME ANGLE OR SYNTAX):
 ${params.existingQuestionTexts.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-VERIFIED CORPUS:
+VERIFIED CORPUS (FROM SUPABASE):
 ${formattedDiscoveries.slice(0, 6000)}
 
 REQUIREMENTS:
 1. Formulate a novel, unique question derived EXCLUSIVELY from the VERIFIED CORPUS above (from the Supabase database). Do not introduce outside facts or unverified details.
-2. Distinctly frame the question around the archetype "${archetype}".
+2. Distinctly frame the question around the archetype "${archetype}" and difficulty level "${targetDifficulty}".
 3. NEVER use repetitive openings like "What is..." or "Which of the following...". Use dynamic inquiry phrasing.
 4. 4 options (A, B, C, D) with EXACTLY ONE option having isCorrect: true. Randomize which letter (A, B, C, or D) is correct.
 5. Detailed explanation and a fascinating "Did you know?" trivia item, both directly grounded in the provided corpus.
@@ -212,6 +313,7 @@ REQUIREMENTS:
 RETURN STRICTLY JSON:
 {
   "archetype": "${archetype}",
+  "difficulty": "${targetDifficulty}",
   "text": string,
   "explanation": string,
   "interestingFact": string,
@@ -228,7 +330,7 @@ RETURN STRICTLY JSON:
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'You are an astronomy quiz engine returning strictly JSON with zero templated phrasing.' },
+        { role: 'system', content: `You are an astronomy quiz engine returning strictly JSON. Calibrate to the ${targetDifficulty} difficulty level, 100% grounded in Supabase data.` },
         { role: 'user', content: prompt },
       ],
       response_format: { type: 'json_object' },
@@ -240,6 +342,7 @@ RETURN STRICTLY JSON:
       id: `regen_q_${Date.now()}_${params.orderIndex}`,
       orderIndex: params.orderIndex,
       archetype: parsed.archetype || archetype,
+      difficulty: (parsed.difficulty as QuestionDifficulty) || targetDifficulty,
       text: parsed.text || 'Newly refreshed astronomy question',
       explanation: parsed.explanation || 'Refreshed explanation based on verified research.',
       interestingFact: parsed.interestingFact || 'Cosmic exploration continues to reveal startling secrets.',
@@ -252,14 +355,19 @@ RETURN STRICTLY JSON:
     };
   } catch (err) {
     console.error('Single question regeneration error:', err);
-    return generateFallbackSingleQuestion(params.orderIndex, params.selectedObjectNames[0] || 'Cosmos', params.discoveries[0]);
+    return generateFallbackSingleQuestion(
+      params.orderIndex,
+      params.selectedObjectNames[0] || 'Cosmos',
+      params.discoveries[0],
+      targetDifficulty
+    );
   }
 }
 
 // ==========================================
 // INTELLIGENT PROCEDURAL QUESTION GENERATOR
-// Ensures every question is completely distinct
-// even if drawn from the exact same discovery.
+// Ensures every question has calibrated bandwidth
+// and 100% Supabase discovery grounding.
 // ==========================================
 
 interface DiscoverySource {
@@ -279,7 +387,8 @@ function cleanText(str?: string): string {
 function createUniqueQuestionFromDiscovery(
   disc: DiscoverySource | undefined,
   targetName: string,
-  questionIndex: number
+  questionIndex: number,
+  difficulty: QuestionDifficulty = 'Medium'
 ): QuestionDraft {
   const archetype = QUESTION_ARCHETYPES[(questionIndex - 1) % QUESTION_ARCHETYPES.length];
   const title = cleanText(disc?.title) || targetName;
@@ -289,8 +398,8 @@ function createUniqueQuestionFromDiscovery(
   const curiositySub = cleanText(disc?.curiositySubtitle);
 
   // Extract candidate concepts from discovery text
-  const sentences = body ? body.split(/(?<=[.?!])\s+/).filter(s => s.length > 20) : [];
-  const primarySentence = sentences[0] || `${targetName} exhibits unique physical characteristics in the solar system.`;
+  const sentences = body ? body.split(/(?<=[.?!])\s+/).filter((s) => s.length > 20) : [];
+  const primarySentence = sentences[0] || `${targetName} exhibits unique physical characteristics in the cosmos.`;
   const secondarySentence = sentences[1] || primarySentence;
 
   let questionText = '';
@@ -299,108 +408,97 @@ function createUniqueQuestionFromDiscovery(
   let explanationText = '';
   let factText = '';
 
-  // Tailor angle based on archetype index (1 to 7)
-  const angleIndex = (questionIndex - 1) % 6;
+  // Tailor question stem, answer, and distractor pool strictly by difficulty level
+  if (difficulty === 'Easy') {
+    // ----------------------------------------------------
+    // EASY: Approachable, direct, prominent discovery fact
+    // ----------------------------------------------------
+    if (curiosityTitle) {
+      questionText = `In Constella's discoveries on ${targetName}, what core finding addresses: "${curiosityTitle}"?`;
+      correctAnswerText = curiositySub || subtitle || primarySentence.slice(0, 80);
+    } else if (subtitle) {
+      questionText = `Regarding ${targetName}, what is the central finding documented in "${title}"?`;
+      correctAnswerText = subtitle;
+    } else {
+      questionText = `Which prominent feature of ${targetName} was highlighted during investigations of "${title}"?`;
+      correctAnswerText = primarySentence.slice(0, 80);
+    }
 
-  switch (angleIndex) {
-    case 0:
-      // Observational Spectroscopy & Evidence
-      questionText = subtitle
-        ? `When spectroscopic instruments examine ${targetName}'s ${subtitle.toLowerCase()}, which signature confirmed researchers' models?`
-        : `What distinct observational signature revealed ${targetName}'s atmospheric and surface dynamics in "${title}"?`;
-      correctAnswerText = subtitle || `Spectral absorption lines characteristic of ${title}`;
-      distractorPool = [
-        'Static continuum radiation without doppler frequency variance',
-        'Pure Rayleigh scattering with zero infrared absorption bands',
-        'Equatorial gravitational resonance devoid of volatile emission',
-        'Unshifted sodium doublet lines caused by cold interstellar dust',
-      ];
-      explanationText = primarySentence;
-      factText = curiosityTitle 
-        ? `${curiosityTitle}: ${curiositySub || 'Deep-space observations confirm this phenomenon.'}`
-        : `Modern spectrographic sensors can isolate trace atmospheric chemical signatures across millions of kilometers.`;
-      break;
+    // Clean, accessible, plausible distractors (clear to read, no dense graduate jargon)
+    distractorPool = [
+      `A permanent runaway greenhouse atmosphere composed primarily of dense methane`,
+      `A global subsurface liquid water ocean protected beneath thousands of meters of ice`,
+      `Active volcanic eruptions continually spewing molten basalt across the surface`,
+      `A rapid rotational period causing extreme centrifugal flattening at the equator`,
+    ];
 
-    case 1:
-      // Physical & Mechanical Process
-      questionText = `Why does the physical mechanism behind "${title}" occur on ${targetName}?`;
-      correctAnswerText = secondarySentence.slice(0, 85) || `Thermodynamic convection coupled with gravitational tidal interaction`;
-      distractorPool = [
-        'Complete hydrostatic cessation preventing interior thermal transfer',
-        'Centrifugal sublimation of the metallic core under zero magnetic flux',
-        'Atmospheric crystallization triggered by solar neutrino pressure',
-        'Subsurface cryogenic freezing without external radiative dissipation',
-      ];
-      explanationText = `Physical dynamics on ${targetName} are governed by ${subtitle ? subtitle.toLowerCase() : 'rotational and gravitational forces'}. ${primarySentence}`;
-      factText = curiositySub || `Tidal stress and solar radiation balance drive continuous thermodynamic cycles across ${targetName}.`;
-      break;
+    explanationText = `Verified Constella record: ${subtitle || primarySentence}`;
+    factText = curiosityTitle
+      ? `${curiosityTitle}: ${curiositySub || 'Direct observations confirm this prominent feature.'}`
+      : `Research probes continue to verify foundational discoveries about ${targetName}.`;
+  } else if (difficulty === 'Medium') {
+    // ----------------------------------------------------
+    // MEDIUM: Intermediate cause-and-effect & process
+    // ----------------------------------------------------
+    questionText = subtitle
+      ? `How does the mechanism behind ${subtitle.toLowerCase()} shape ${targetName}'s environment?`
+      : `Why does the physical process described in "${title}" occur on ${targetName}?`;
 
-    case 2:
-      // Cosmic Anomaly & Paradox
-      questionText = curiosityTitle
-        ? `What counterintuitive phenomenon regarding ${targetName} is highlighted by "${curiosityTitle}"?`
-        : `What unexpected discrepancy between theoretical models and empirical data was uncovered at ${targetName}?`;
-      correctAnswerText = curiositySub || subtitle || `An unexpected temperature inversion and volatile retention rate`;
-      distractorPool = [
-        'Uniform surface heating despite extreme axial tilt and orbital eccentricity',
-        'A total absence of solar-wind induced sputtering across the terminator',
-        'Symmetrical magnetospheric lobes that ignore interplanetary magnetic fields',
-        'Instantaneous dissipation of atmospheric kinetic energy at perihelion',
-      ];
-      explanationText = curiositySub 
-        ? `Astronomers observed that ${curiositySub.toLowerCase()}`
-        : `Observations contradicted traditional thermodynamic assumptions, revealing complex environmental interactions.`;
-      factText = `Planetary anomalies often force astrophysicists to revise fundamental planetary evolution equations.`;
-      break;
+    correctAnswerText = secondarySentence.slice(0, 85) || subtitle || `Gravitational interaction coupled with solar radiative forcing`;
 
-    case 3:
-      // Comparative Scale & Planetary Dynamics
-      questionText = `How do the rotational and orbital dynamics of ${targetName} influence its environmental stability?`;
-      correctAnswerText = `Differential orbital velocity and gravitational resonance stabilize atmospheric circulation`;
-      distractorPool = [
-        'Synchronous tidal locking that eliminates all seasonal atmospheric variance',
-        'Chaotic axial flipping occurring every few thousand rotational periods',
-        'Hyperbolic orbital decay caused by Poynting-Robertson solar drag',
-        'Complete magnetospheric collapse during aphelion transit',
-      ];
-      explanationText = `The scale and orbital configuration of ${targetName} create distinct observational patterns confirmed by deep-space probes.`;
-      factText = `Orbital resonance acts as a cosmic pacemaker, synchronizing atmospheric and tidal rhythms.`;
-      break;
+    distractorPool = [
+      'Total magnetic field decay allowing unhindered solar wind sputtering across the terminator',
+      'Differential tidal friction driven by resonance with neighboring celestial bodies',
+      'Subsurface thermal equilibrium that prevents volatile gas evaporation into the exosphere',
+      'Extreme axial obliquity causing dramatic alternating hemispheric glaciation cycles',
+    ];
 
-    case 4:
-      // Surface & Geological Evolution
-      questionText = `Which geological or surface formation mechanism actively reshapes the terrain of ${targetName}?`;
-      correctAnswerText = subtitle || `Cryovolcanic deposition and tectonic extensional faulting`;
-      distractorPool = [
-        'Pure impact vaporization without any subsequent regolith settling',
-        'Uniform lithospheric cooling preventing all mantle convection currents',
-        'Basaltic lava plains formed exclusively by solar corona thermal pulses',
-        'Sub-crustal cavitation caused by gravitational microlensing',
-      ];
-      explanationText = `Topographical and surface analyses of ${targetName} demonstrate active geological evolution over geological epochs.`;
-      factText = curiosityTitle 
-        ? `${curiosityTitle} continues to offer critical clues regarding early Solar System formation.`
-        : `Geological weathering in near-vacuum environments produces distinct, sharp-edged landforms unlike Earth.`;
-      break;
+    explanationText = `Physical dynamics on ${targetName} are governed by observed processes: ${primarySentence}`;
+    factText = curiositySub || `Tidal and thermodynamic cycles maintain continuous activity across ${targetName}.`;
+  } else if (difficulty === 'Hard') {
+    // ----------------------------------------------------
+    // HARD: Advanced scientific evidence, telemetry & dating
+    // ----------------------------------------------------
+    questionText = subtitle
+      ? `Which specific observational telemetry or isotopic signature verified researchers' models of ${targetName}'s ${subtitle.toLowerCase()}?`
+      : `What distinct empirical evidence recorded by deep-space sensors established "${title}" at ${targetName}?`;
 
-    case 5:
-    default:
-      // Exploration Telemetry & Direct Evidence
-      questionText = `What key evidentiary finding did space probes record when surveying ${targetName} during investigations of "${title}"?`;
-      correctAnswerText = primarySentence.slice(0, 90) || `High-resolution radar telemetry indicating dense subsurface stratification`;
-      distractorPool = [
-        'Absence of any ionospheric layer capable of reflecting radio waves',
-        'Zero magnetic perturbation despite high concentrations of metallic iron',
-        'Constant homogenous temperature across both lit and shadowed hemispheres',
-        'Complete optical transparency in both infrared and ultraviolet spectra',
-      ];
-      explanationText = `Remote sensing instruments aboard interplanetary orbiters verified these distinct physical properties.`;
-      factText = `Planetary probe instrumentation must withstand extreme radiation belts to capture these millimeter-precise measurements.`;
-      break;
+    correctAnswerText = primarySentence.slice(0, 90) || `Distinct spectroscopic absorption signatures and radiometric dating samples`;
+
+    distractorPool = [
+      'Static continuum emission without any measurable Doppler frequency shift',
+      'Unshifted neutral sodium absorption lines produced solely by circumstellar dust',
+      'Homogeneous infrared radiation indicating uniform internal heat transfer across all latitudes',
+      'Symmetrical magnetospheric boundary currents during perihelion solar transit',
+    ];
+
+    explanationText = `Empirical instruments aboard orbiters and spectroscopic arrays established: ${primarySentence}`;
+    factText = curiosityTitle
+      ? `${curiosityTitle}: ${curiositySub || 'Deep-space instruments required high-precision calibration to confirm this.'}`
+      : `High-resolution telemetry provides the empirical foundation for planetary science.`;
+  } else {
+    // ----------------------------------------------------
+    // VERY DIFFICULT: Nuanced paradox, anomaly, or puzzle
+    // ----------------------------------------------------
+    questionText = curiosityTitle
+      ? `What theoretical paradox regarding ${targetName} was uncovered by "${curiosityTitle}"?`
+      : `What counterintuitive discrepancy between theoretical models and empirical telemetry was revealed in "${title}" at ${targetName}?`;
+
+    correctAnswerText = curiositySub || `An unexpected temperature disparity and volatile retention rate contradicting classical models`;
+
+    distractorPool = [
+      'Uniform hydrostatic equilibrium persisting despite catastrophic core deceleration and mantle decoupling',
+      'Instantaneous dissipation of atmospheric kinetic energy during aphelion orbital transition',
+      'Complete absence of solar-wind induced sputtering across the sunlit terminator boundary',
+      'Asymmetrical gravitational quadrupole moments violating established orbital decay baselines',
+    ];
+
+    explanationText = `Analysis of ${targetName} revealed surprising complexities: ${primarySentence} ${curiositySub ? `Notably, ${curiositySub.toLowerCase()}` : ''}`;
+    factText = `Cosmic anomalies frequently prompt astrophysicists to revise foundational equations of planetary evolution.`;
   }
 
   // Shuffle options and randomize correct answer position across A, B, C, D
-  const correctPrefixIndex = (questionIndex * 7) % 4; // produces 3, 2, 1, 0, 3...
+  const correctPrefixIndex = (questionIndex * 7 + (difficulty === 'Easy' ? 1 : 2)) % 4;
   const letters: Array<'A' | 'B' | 'C' | 'D'> = ['A', 'B', 'C', 'D'];
   const targetPrefix = letters[correctPrefixIndex];
 
@@ -410,7 +508,7 @@ function createUniqueQuestionFromDiscovery(
 
   const options: QuestionOptionDraft[] = letters.map((prefix) => {
     const isCorrect = prefix === targetPrefix;
-    const text = isCorrect ? correctAnswerText : (distractors[distractorIdx++] || 'Alternative astrophysical outcome');
+    const text = isCorrect ? correctAnswerText : distractors[distractorIdx++] || 'Alternative astronomical outcome';
     return {
       id: `fb_opt_${questionIndex}_${prefix}`,
       prefix,
@@ -423,6 +521,7 @@ function createUniqueQuestionFromDiscovery(
     id: `fb_q_${questionIndex}`,
     orderIndex: questionIndex,
     archetype,
+    difficulty,
     text: questionText,
     explanation: explanationText,
     interestingFact: factText,
@@ -433,25 +532,25 @@ function createUniqueQuestionFromDiscovery(
 function generateFallbackQuest(
   params: GenerateQuestParams,
   dateRange: string,
-  duration: string
+  duration: string,
+  targetDifficulties: QuestionDifficulty[]
 ): QuestDraft {
   const targets = params.selectedObjectNames.length > 0 ? params.selectedObjectNames : ['Cosmic Systems'];
   const isMixed = targets.length > 1;
   const targetLabel = isMixed
     ? targets.slice(0, 3).join(', ') + (targets.length > 3 ? ' & More' : '')
     : targets[0];
-  const questTitle = isMixed
-    ? `Cosmic Odyssey: ${targetLabel}`
-    : `The Architecture of ${targets[0]}`;
+  const questTitle = isMixed ? `Cosmic Odyssey: ${targetLabel}` : `The Architecture of ${targets[0]}`;
 
   const questions: QuestionDraft[] = [];
 
   for (let i = 1; i <= params.questionCount; i++) {
-    // Distribute across available discoveries, cycling if questionCount > discoveries.length
+    // Distribute across available discoveries
     const disc = params.discoveries[(i - 1) % (params.discoveries.length || 1)] || params.discoveries[0];
     // Rotate target object for each question so each selected entity gets featured
     const targetForThisQuestion = targets[(i - 1) % targets.length];
-    questions.push(createUniqueQuestionFromDiscovery(disc, targetForThisQuestion, i));
+    const diff = targetDifficulties[i - 1] || 'Medium';
+    questions.push(createUniqueQuestionFromDiscovery(disc, targetForThisQuestion, i, diff));
   }
 
   return {
@@ -470,7 +569,11 @@ function generateFallbackQuest(
   };
 }
 
-function generateFallbackSingleQuestion(orderIndex: number, target: string, disc?: DiscoverySource): QuestionDraft {
-  return createUniqueQuestionFromDiscovery(disc, target, orderIndex);
+function generateFallbackSingleQuestion(
+  orderIndex: number,
+  target: string,
+  disc?: DiscoverySource,
+  difficulty: QuestionDifficulty = 'Medium'
+): QuestionDraft {
+  return createUniqueQuestionFromDiscovery(disc, target, orderIndex, difficulty);
 }
-

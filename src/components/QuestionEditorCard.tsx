@@ -1,9 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RefreshCw, CheckCircle2, Circle, Sparkles, Trash2, HelpCircle, Lightbulb, Compass } from 'lucide-react';
-import { QuestionDraft } from '@/lib/types';
-import { QUESTION_ARCHETYPES } from '@/lib/openai';
+import { 
+  RefreshCw, 
+  CheckCircle2, 
+  Circle, 
+  Sparkles, 
+  Trash2, 
+  HelpCircle, 
+  Lightbulb, 
+  Compass,
+  Gauge,
+  Flame,
+  Zap,
+  Sprout,
+  Skull
+} from 'lucide-react';
+import { QuestionDraft, QuestionDifficulty } from '@/lib/types';
+import { QUESTION_ARCHETYPES, getDifficultyForIndex } from '@/lib/openai';
 
 interface QuestionEditorCardProps {
   question: QuestionDraft;
@@ -19,6 +33,7 @@ interface QuestionEditorCardProps {
 export default function QuestionEditorCard({
   question,
   index,
+  totalQuestions,
   category,
   selectedObjectIds,
   existingQuestionTexts,
@@ -27,6 +42,7 @@ export default function QuestionEditorCard({
 }: QuestionEditorCardProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const currentArchetype = question.archetype || QUESTION_ARCHETYPES[index % QUESTION_ARCHETYPES.length];
+  const currentDifficulty: QuestionDifficulty = question.difficulty || getDifficultyForIndex(index + 1, totalQuestions);
 
   const handleRefreshThisQuestion = async () => {
     setIsRefreshing(true);
@@ -39,6 +55,7 @@ export default function QuestionEditorCard({
           selectedObjectIds,
           existingQuestionTexts: existingQuestionTexts.filter((t) => t !== question.text),
           orderIndex: question.orderIndex,
+          difficulty: currentDifficulty,
         }),
       });
 
@@ -50,6 +67,7 @@ export default function QuestionEditorCard({
           ...data.question,
           id: question.id,
           orderIndex: question.orderIndex,
+          difficulty: currentDifficulty,
         });
       }
     } catch (err) {
@@ -83,20 +101,78 @@ export default function QuestionEditorCard({
     onUpdate({ ...question, options: updatedOptions });
   };
 
+  // Helper for difficulty styling
+  const getDifficultyBadge = (diff: QuestionDifficulty) => {
+    switch (diff) {
+      case 'Easy':
+        return {
+          icon: <Sprout className="w-3 h-3 text-emerald-400" />,
+          classes: 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)]',
+          label: 'Easy (Warm-up)',
+        };
+      case 'Medium':
+        return {
+          icon: <Zap className="w-3 h-3 text-amber-400" />,
+          classes: 'bg-amber-950/60 border-amber-500/40 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)]',
+          label: 'Medium (Core)',
+        };
+      case 'Hard':
+        return {
+          icon: <Flame className="w-3 h-3 text-violet-400" />,
+          classes: 'bg-violet-950/60 border-violet-500/40 text-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.2)]',
+          label: 'Hard (Analytical)',
+        };
+      case 'Very Difficult':
+        return {
+          icon: <Skull className="w-3 h-3 text-rose-400" />,
+          classes: 'bg-rose-950/60 border-rose-500/40 text-rose-300 shadow-[0_0_10px_rgba(244,63,94,0.25)]',
+          label: 'Very Difficult (Mastery)',
+        };
+      default:
+        return {
+          icon: <Gauge className="w-3 h-3 text-blue-400" />,
+          classes: 'bg-blue-950/60 border-blue-500/40 text-blue-300',
+          label: diff,
+        };
+    }
+  };
+
+  const badge = getDifficultyBadge(currentDifficulty);
+
   return (
     <div className="relative rounded-2xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] hover:border-blue-500/50 p-5 sm:p-6 shadow-glass-card hover:shadow-glass-card-hover transition-all duration-300 group">
-      {/* Question Header & Refresh Action */}
+      {/* Question Header: Number, Archetype, Difficulty & Action */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.08] mb-4">
-        <div className="flex items-center space-x-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Order number */}
           <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center font-mono font-bold text-xs text-blue-300 shadow-[0_0_12px_rgba(37,99,235,0.3)]">
             {index + 1}
           </div>
           
-          {/* Question Archetype Badge (Ensures each question is uniquely framed) */}
+          {/* Question Archetype Badge */}
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-500/40 text-blue-300 font-mono text-[11px] font-medium tracking-wide shadow-sm">
             <Compass className="w-3 h-3 text-blue-400" />
             <span>{currentArchetype}</span>
           </div>
+
+          {/* Difficulty Badge with interactive switcher */}
+          <div className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-mono font-medium ${badge.classes}`}>
+            {badge.icon}
+            <span>{badge.label}</span>
+          </div>
+
+          {/* Difficulty Dropdown Selector */}
+          <select
+            value={currentDifficulty}
+            onChange={(e) => handleTextChange('difficulty', e.target.value as QuestionDifficulty)}
+            className="px-2 py-0.5 rounded-lg bg-black/60 border border-white/[0.1] hover:border-blue-500/40 text-slate-300 hover:text-white text-[11px] font-mono outline-none cursor-pointer transition-colors"
+            title="Adjust difficulty level for this question"
+          >
+            <option value="Easy">Set: Easy</option>
+            <option value="Medium">Set: Medium</option>
+            <option value="Hard">Set: Hard</option>
+            <option value="Very Difficult">Set: Very Difficult</option>
+          </select>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -106,10 +182,10 @@ export default function QuestionEditorCard({
             disabled={isRefreshing}
             onClick={handleRefreshThisQuestion}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 border border-blue-500/40 hover:border-blue-400 text-blue-200 text-xs font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
-            title="Use AI to generate a brand new unique question for this card"
+            title={`Regenerate this question specifically as a ${currentDifficulty} challenge`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-400' : ''}`} />
-            <span>{isRefreshing ? 'AI Synthesizing...' : 'Refresh Question'}</span>
+            <span>{isRefreshing ? 'Synthesizing...' : `Refresh (${currentDifficulty})`}</span>
             <Sparkles className="w-3 h-3 text-blue-400 opacity-80" />
           </button>
 
@@ -130,7 +206,9 @@ export default function QuestionEditorCard({
           <label className="text-xs font-medium text-slate-300 font-mono flex items-center space-x-1">
             <span>Question Inquiry Prompt</span>
           </label>
-          <span className="text-[10px] text-slate-500 font-mono">Unique angle & framing</span>
+          <span className="text-[10px] text-slate-500 font-mono">
+            {currentDifficulty} · 100% Supabase Grounded
+          </span>
         </div>
         <textarea
           rows={2}

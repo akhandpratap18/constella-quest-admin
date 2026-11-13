@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import QuestionEditorCard from '@/components/QuestionEditorCard';
@@ -14,7 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { QuestDraft, QuestionDraft } from '@/lib/types';
-import { QUESTION_ARCHETYPES } from '@/lib/openai';
+import { QUESTION_ARCHETYPES, getDifficultyForIndex } from '@/lib/openai';
 
 export default function EditQuestPage() {
   const router = useRouter();
@@ -33,6 +33,13 @@ export default function EditQuestPage() {
         const res = await fetch(`/api/quests/${questId}`);
         if (!res.ok) throw new Error('Quest not found');
         const data = await res.json();
+        if (data.quest && data.quest.questions) {
+          data.quest.questions = data.quest.questions.map((q: QuestionDraft, idx: number) => ({
+            ...q,
+            archetype: q.archetype || QUESTION_ARCHETYPES[idx % QUESTION_ARCHETYPES.length],
+            difficulty: q.difficulty || getDifficultyForIndex(q.orderIndex || idx + 1, data.quest.questions.length),
+          }));
+        }
         setQuest(data.quest);
       } catch (err: any) {
         setErrorMessage(err.message || 'Failed to fetch quest');
@@ -45,6 +52,16 @@ export default function EditQuestPage() {
       fetchQuestData();
     }
   }, [questId]);
+
+  const difficultyStats = useMemo(() => {
+    if (!quest) return { easy: 0, medium: 0, hard: 0, veryHard: 0 };
+    return {
+      easy: quest.questions.filter((q) => q.difficulty === 'Easy').length,
+      medium: quest.questions.filter((q) => q.difficulty === 'Medium').length,
+      hard: quest.questions.filter((q) => q.difficulty === 'Hard').length,
+      veryHard: quest.questions.filter((q) => q.difficulty === 'Very Difficult').length,
+    };
+  }, [quest]);
 
   const handleUpdateQuestion = (index: number, updated: QuestionDraft) => {
     if (!quest) return;
@@ -66,6 +83,7 @@ export default function EditQuestPage() {
       id: `manual_${Date.now()}_${newIdx}`,
       orderIndex: newIdx,
       archetype: QUESTION_ARCHETYPES[(newIdx - 1) % QUESTION_ARCHETYPES.length],
+      difficulty: 'Easy',
       text: 'New Astronomy Question Inquiry',
       explanation: 'Explanation for why this is the correct answer.',
       interestingFact: 'Fascinating space fact.',
@@ -282,18 +300,42 @@ export default function EditQuestPage() {
 
         {/* Questions Editor List */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-bold text-white tracking-tight">Questions Bank</h3>
               <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
                 {quest.questions.length} Items
               </span>
+
+              {/* Bandwidth Breakdown */}
+              <div className="flex flex-wrap items-center gap-1.5 ml-1">
+                {difficultyStats.easy > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[10px] font-mono">
+                    🌱 {difficultyStats.easy} Easy
+                  </span>
+                )}
+                {difficultyStats.medium > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-300 text-[10px] font-mono">
+                    ⚡ {difficultyStats.medium} Medium
+                  </span>
+                )}
+                {difficultyStats.hard > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-violet-950/60 border border-violet-500/40 text-violet-300 text-[10px] font-mono">
+                    🔥 {difficultyStats.hard} Hard
+                  </span>
+                )}
+                {difficultyStats.veryHard > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/40 text-rose-300 text-[10px] font-mono">
+                    💀 {difficultyStats.veryHard} Very Hard
+                  </span>
+                )}
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handleAddQuestion}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.1] hover:border-blue-500/40 text-blue-300 hover:text-white text-xs font-medium transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.1] hover:border-blue-500/40 text-blue-300 hover:text-white text-xs font-medium transition-colors self-start sm:self-auto"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Question</span>

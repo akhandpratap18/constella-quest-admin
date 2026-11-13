@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { QuestDraft } from '@/lib/types';
+import { QUESTION_ARCHETYPES, getDifficultyForIndex } from '@/lib/openai';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAdminSession();
@@ -62,6 +63,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         text: q.text,
         explanation: q.explanation,
         interestingFact: q.interestingFact || '',
+        archetype: QUESTION_ARCHETYPES[(q.orderIndex - 1) % QUESTION_ARCHETYPES.length],
+        difficulty: getDifficultyForIndex(q.orderIndex, (questions || []).length),
         options: qOptions,
       };
     });
