@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       existingQuestionTexts = [], 
       orderIndex = 1,
       difficulty,
+      apiKey,
     } = await req.json();
 
     const { data: objects } = await supabase
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
       existingQuestionTexts,
       orderIndex,
       difficulty,
+      apiKey,
     });
 
     return NextResponse.json({ question });

@@ -1,12 +1,12 @@
 import OpenAI from 'openai';
 import { QuestionDraft, QuestDraft, QuestionOptionDraft, QuestionDifficulty, EnrichedDiscovery } from './types';
 
-function getOpenAIClient(): OpenAI | null {
-  const apiKey = process.env.OPENAI_API_KEY;
+function getOpenAIClient(customApiKey?: string): OpenAI | null {
+  const apiKey = customApiKey || process.env.OPENAI_API_KEY;
   if (!apiKey || apiKey.trim() === '' || apiKey.includes('your-openai-api-key')) {
     return null;
   }
-  return new OpenAI({ apiKey });
+  return new OpenAI({ apiKey: apiKey.trim() });
 }
 
 export interface GenerateQuestParams {
@@ -17,6 +17,7 @@ export interface GenerateQuestParams {
   durationMinutes: number;
   targetDate: string; // ISO or date string
   bandwidthMode?: 'mixed' | 'accessible' | 'challenging';
+  apiKey?: string;
 }
 
 export const QUESTION_ARCHETYPES = [
@@ -90,7 +91,7 @@ export function getDifficultyForIndex(
 }
 
 export async function generateFullQuest(params: GenerateQuestParams): Promise<QuestDraft> {
-  const openai = getOpenAIClient();
+  const openai = getOpenAIClient(params.apiKey);
 
   const formattedDiscoveries = params.discoveries
     .map(
@@ -248,8 +249,9 @@ export async function regenerateSingleQuestion(params: {
   existingQuestionTexts: string[];
   orderIndex: number;
   difficulty?: QuestionDifficulty;
+  apiKey?: string;
 }): Promise<QuestionDraft> {
-  const openai = getOpenAIClient();
+  const openai = getOpenAIClient(params.apiKey);
 
   const formattedDiscoveries = params.discoveries
     .map(

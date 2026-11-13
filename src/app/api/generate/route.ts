@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       durationMinutes = 10,
       targetDate = new Date().toISOString().split('T')[0],
       bandwidthMode = 'mixed',
+      apiKey,
     } = await req.json();
 
     if (!selectedObjectIds || selectedObjectIds.length === 0) {
@@ -121,6 +122,7 @@ export async function POST(req: NextRequest) {
       durationMinutes: Number(durationMinutes),
       targetDate,
       bandwidthMode: bandwidthMode as any,
+      apiKey,
     });
 
     generated.weekNumber = nextWeekNumber;
