@@ -78,6 +78,7 @@ ${formattedDiscoveries.slice(0, 12000)}
 
 CRITICAL UNIQUENESS & DIVERSITY MANDATE:
 - NO COOKIE-CUTTER TEMPLATES: Every single question MUST come up as completely unique in its own right, with its own distinct structure, sentence opening, cognitive angle, and linguistic cadence, even if all questions are derived from the exact same source discovery or object.
+- MULTI-OBJECT / MIXED TOPIC COVERAGE: If multiple objects are specified (${params.selectedObjectNames.join(', ')}), alternate questions across ALL chosen objects and categories so every selected entity is represented in the quest.
 - DIVERSE QUESTION ARCHETYPES: You must rotate through different cognitive lenses for each question:
   1. Observational Evidence & Instrumentation (e.g. "When spectrometers analyze the reflectance of [Object], what distinct signature...")
   2. Physical Mechanism & Cause-Effect (e.g. "Why does the interaction between [Process A] and [Process B] prevent...")
@@ -429,19 +430,29 @@ function generateFallbackQuest(
   dateRange: string,
   duration: string
 ): QuestDraft {
-  const target = params.selectedObjectNames.join(' & ') || 'Cosmic System';
+  const targets = params.selectedObjectNames.length > 0 ? params.selectedObjectNames : ['Cosmic Systems'];
+  const isMixed = targets.length > 1;
+  const targetLabel = isMixed
+    ? targets.slice(0, 3).join(', ') + (targets.length > 3 ? ' & More' : '')
+    : targets[0];
+  const questTitle = isMixed
+    ? `Cosmic Odyssey: ${targetLabel}`
+    : `The Architecture of ${targets[0]}`;
+
   const questions: QuestionDraft[] = [];
 
   for (let i = 1; i <= params.questionCount; i++) {
     // Distribute across available discoveries, cycling if questionCount > discoveries.length
     const disc = params.discoveries[(i - 1) % (params.discoveries.length || 1)] || params.discoveries[0];
-    questions.push(createUniqueQuestionFromDiscovery(disc, target, i));
+    // Rotate target object for each question so each selected entity gets featured
+    const targetForThisQuestion = targets[(i - 1) % targets.length];
+    questions.push(createUniqueQuestionFromDiscovery(disc, targetForThisQuestion, i));
   }
 
   return {
-    title: `The Architecture of ${target}`,
-    description: `Examine the astrophysical mechanisms, atmospheric signatures, and evolutionary history of ${target}.`,
-    category: params.category === 'Planets' ? 'Planetary Science' : 'Astrophysics',
+    title: questTitle,
+    description: `Examine the astrophysical mechanisms, atmospheric signatures, and evolutionary history across ${targets.join(', ')}.`,
+    category: params.category || (isMixed ? 'Mixed Celestial Exploration' : 'Planetary Science'),
     difficulty: 'Intermediate',
     weekNumber: 5,
     durationString: duration,

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         .from('Discoveries')
         .select('title, body')
         .in('topicId', topicIds)
-        .limit(15);
+        .limit(40);
       discoveries = discs || [];
     }
 

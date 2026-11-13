@@ -22,10 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'At least one celestial object must be selected' }, { status: 400 });
     }
 
-    // 1. Fetch object names and image URLs
+    // 1. Fetch object names, categories, and image URLs
     const { data: objects, error: objErr } = await supabase
       .from('CelestialObjects')
-      .select('id, name, imageUrl')
+      .select('id, name, category, imageUrl')
       .in('id', selectedObjectIds);
 
     if (objErr) throw objErr;
@@ -33,7 +33,23 @@ export async function POST(req: NextRequest) {
     const objectNames = (objects || []).map((o) => o.name);
     const primaryImage = objects?.[0]?.imageUrl || '';
 
-    // 2. Fetch Topics for these objects
+    // Determine effective category if mixed
+    const rawCategories = Array.from(new Set((objects || []).map((o) => o.category).filter(Boolean)));
+    const uniqueCategories = rawCategories.map((c) => {
+      const lower = c.toLowerCase();
+      if (lower.includes('planet')) return 'Planets';
+      if (lower.includes('galax')) return 'Galaxies';
+      if (lower.includes('constellat')) return 'Constellations';
+      if (lower.includes('phenomen')) return 'Phenomena';
+      return c;
+    });
+    const distinctCategories = Array.from(new Set(uniqueCategories));
+    
+    const effectiveCategory = distinctCategories.length > 1
+      ? `Mixed (${distinctCategories.join(' & ')})`
+      : (distinctCategories[0] || category || 'Planetary Science');
+
+    // 2. Fetch Topics for all selected objects
     const { data: topics, error: topErr } = await supabase
       .from('Topics')
       .select('id, objectId, title')
@@ -42,14 +58,14 @@ export async function POST(req: NextRequest) {
     if (topErr) throw topErr;
     const topicIds = (topics || []).map((t) => t.id);
 
-    // 3. Fetch Discoveries for these topics
+    // 3. Fetch Discoveries for all topics (higher limit for multi-object mix)
     let discoveries: any[] = [];
     if (topicIds.length > 0) {
       const { data: discs, error: discErr } = await supabase
         .from('Discoveries')
         .select('id, topicId, title, subtitle, body, caption, curiosityTitle, curiositySubtitle')
         .in('topicId', topicIds)
-        .limit(20);
+        .limit(50);
 
       if (discErr) throw discErr;
       discoveries = discs || [];
@@ -64,9 +80,9 @@ export async function POST(req: NextRequest) {
 
     const nextWeekNumber = (existingQuests?.[0]?.weekNumber ?? 4) + 1;
 
-    // 5. Generate Quest via OpenAI
+    // 5. Generate Quest via OpenAI / Anti-template Synthesizer
     const generated = await generateFullQuest({
-      category,
+      category: effectiveCategory,
       selectedObjectNames: objectNames,
       discoveries,
       questionCount: Number(questionCount),
@@ -77,7 +93,7 @@ export async function POST(req: NextRequest) {
     generated.weekNumber = nextWeekNumber;
     generated.imageUrl = primaryImage;
     generated.selectedObjectIds = selectedObjectIds;
-    generated.selectedCategory = category;
+    generated.selectedCategory = effectiveCategory;
 
     return NextResponse.json({ quest: generated });
   } catch (error: any) {

@@ -25,17 +25,18 @@ export async function GET() {
     // Group by canonical categories
     const categoriesMap: Record<string, any[]> = {
       Planets: [],
-      Constellations: [],
       Galaxies: [],
+      Constellations: [],
       Phenomena: [],
     };
 
     (objects || []).forEach((obj) => {
       const rawCat = (obj.category || '').toLowerCase();
       let canonCat = 'Phenomena';
-      if (rawCat === 'planets' || rawCat === 'planet') canonCat = 'Planets';
-      else if (rawCat === 'constellations') canonCat = 'Constellations';
-      else if (rawCat === 'galaxies') canonCat = 'Galaxies';
+      if (rawCat.includes('planet')) canonCat = 'Planets';
+      else if (rawCat.includes('galax')) canonCat = 'Galaxies';
+      else if (rawCat.includes('constellat')) canonCat = 'Constellations';
+      else if (rawCat.includes('phenomen')) canonCat = 'Phenomena';
 
       const objTopics = (topics || []).filter((t) => t.objectId === obj.id);
 

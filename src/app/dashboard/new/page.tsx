@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import QuestionEditorCard from '@/components/QuestionEditorCard';
@@ -18,7 +18,10 @@ import {
   Save, 
   CheckCircle2,
   Globe2,
-  Compass
+  Compass,
+  Search,
+  X,
+  Shuffle
 } from 'lucide-react';
 import { QuestDraft, QuestionDraft } from '@/lib/types';
 
@@ -42,7 +45,8 @@ export default function NewQuestPage() {
   // Wizard Configuration State
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Planets');
+  const [activeFilterTab, setActiveFilterTab] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>(['mars']);
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [durationMinutes, setDurationMinutes] = useState<number>(10);
@@ -65,7 +69,7 @@ export default function NewQuestPage() {
         if (res.ok) {
           const data = await res.json();
           setCategories(data.categories || []);
-          // Default selection
+          // Default selection if available
           const planetsGroup = (data.categories || []).find((c: any) => c.name === 'Planets');
           if (planetsGroup && planetsGroup.items.length > 0) {
             setSelectedObjectIds([planetsGroup.items[0].id]);
@@ -80,28 +84,89 @@ export default function NewQuestPage() {
     loadTopics();
   }, []);
 
-  const activeCategoryGroup = categories.find((c) => c.name === selectedCategory) || categories[0];
+  // Flatten all items across all categories
+  const allObjects = useMemo(() => {
+    return categories.flatMap((c) => c.items);
+  }, [categories]);
 
+  // Selected items with full object details
+  const selectedItems = useMemo(() => {
+    return allObjects.filter((o) => selectedObjectIds.includes(o.id));
+  }, [allObjects, selectedObjectIds]);
+
+  // Compute distinct categories in the current mix
+  const distinctSelectedCategories = useMemo(() => {
+    return Array.from(new Set(selectedItems.map((i) => i.category)));
+  }, [selectedItems]);
+
+  const effectiveCategory = useMemo(() => {
+    if (distinctSelectedCategories.length > 1) {
+      return `Mixed (${distinctSelectedCategories.join(' & ')})`;
+    }
+    return distinctSelectedCategories[0] || 'Planetary Science';
+  }, [distinctSelectedCategories]);
+
+  // Filter objects based on active tab and search query
+  const filteredObjects = useMemo(() => {
+    let list = allObjects;
+
+    if (activeFilterTab === 'SELECTED') {
+      list = allObjects.filter((o) => selectedObjectIds.includes(o.id));
+    } else if (activeFilterTab !== 'ALL') {
+      list = allObjects.filter((o) => o.category === activeFilterTab);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (o) =>
+          o.name.toLowerCase().includes(q) ||
+          (o.subtitle && o.subtitle.toLowerCase().includes(q)) ||
+          o.category.toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [allObjects, activeFilterTab, selectedObjectIds, searchQuery]);
+
+  // Toggle selection for a single object without wiping other selections
   const handleToggleObject = (id: string) => {
     if (selectedObjectIds.includes(id)) {
-      if (selectedObjectIds.length > 1) {
-        setSelectedObjectIds(selectedObjectIds.filter((item) => item !== id));
-      }
+      setSelectedObjectIds(selectedObjectIds.filter((item) => item !== id));
     } else {
       setSelectedObjectIds([...selectedObjectIds, id]);
     }
   };
 
-  const handleSelectAllInCat = () => {
-    if (!activeCategoryGroup) return;
-    const allIds = activeCategoryGroup.items.map((i) => i.id);
-    setSelectedObjectIds(allIds);
+  const handleSelectAllFiltered = () => {
+    const idsToAdd = filteredObjects.map((o) => o.id);
+    const merged = Array.from(new Set([...selectedObjectIds, ...idsToAdd]));
+    setSelectedObjectIds(merged);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedObjectIds([]);
+  };
+
+  // Quick preset: Pick popular mix (e.g. Mars, Andromeda, Triangulum)
+  const handlePickPopularMix = () => {
+    const targetMixIds = ['mars', 'andromeda-galaxy', 'triangulum-galaxy'];
+    const matched = allObjects.filter((o) => 
+      targetMixIds.includes(o.id) || 
+      o.id.includes('mars') || 
+      o.id.includes('andromeda') || 
+      o.id.includes('triangulum')
+    ).slice(0, 3).map((o) => o.id);
+
+    if (matched.length > 0) {
+      setSelectedObjectIds(matched);
+    }
   };
 
   // Step: AI Generation
   const handleGenerate = async () => {
     if (selectedObjectIds.length === 0) {
-      setErrorMessage('Please select at least one celestial object.');
+      setErrorMessage('Please select at least one celestial entity for the quest.');
       return;
     }
 
@@ -113,7 +178,7 @@ export default function NewQuestPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: selectedCategory,
+          category: effectiveCategory,
           selectedObjectIds,
           questionCount,
           durationMinutes,
@@ -201,10 +266,8 @@ export default function NewQuestPage() {
     }
   };
 
-  // Find artwork fallback from selected objects
-  const defaultArtworkUrl = activeCategoryGroup?.items.find((i) =>
-    selectedObjectIds.includes(i.id)
-  )?.imageUrl;
+  // Artwork fallback from selected objects
+  const defaultArtworkUrl = selectedItems.find((i) => i.imageUrl)?.imageUrl;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -226,13 +289,13 @@ export default function NewQuestPage() {
             <div className="space-y-1">
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-mono font-medium">
                 <Compass className="w-3.5 h-3.5 text-sky-400" />
-                <span>Deterministic Quest Synthesis</span>
+                <span>Deterministic Multi-Topic Synthesis</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Synthesize Weekly Quest
               </h1>
               <p className="text-sm text-slate-400 max-w-2xl">
-                Select target celestial entities. The AI Agent will inspect verified discoveries in Supabase and craft non-templated, unique questions covering distinct pedagogical angles.
+                Choose any mix of celestial entities across Planets, Galaxies, Constellations, and Phenomena (e.g. Mars + Andromeda + Triangulum). The AI will synthesize unique questions spanning your selected mix.
               </p>
             </div>
 
@@ -244,90 +307,213 @@ export default function NewQuestPage() {
 
             {/* Scope Card */}
             <div className="rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-glass-card space-y-6">
-              {/* Category Tabs */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
-                  1. Select Target Category
-                </label>
-                <div className="flex flex-wrap gap-2.5">
-                  {isLoadingCategories ? (
-                    <div className="flex items-center space-x-2 text-slate-400 text-sm py-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
-                      <span>Loading database categories...</span>
-                    </div>
-                  ) : (
-                    categories.map((cat) => (
+              
+              {/* Category Filter Pills & Search Bar */}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
+                    1. Filter & Search Celestial Entities
+                  </label>
+                  
+                  {/* Preset quick button */}
+                  <button
+                    type="button"
+                    onClick={handlePickPopularMix}
+                    className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/60 border border-blue-500/30 text-blue-300 text-xs font-mono transition-colors self-start sm:self-auto"
+                    title="Pre-select Mars, Andromeda, and Triangulum"
+                  >
+                    <Shuffle className="w-3 h-3 text-sky-400" />
+                    <span>Preset: Mars + Andromeda + Triangulum</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-3">
+                  {/* Filter Pills */}
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilterTab('ALL')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
+                        activeFilterTab === 'ALL'
+                          ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]'
+                          : 'bg-black/40 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/30'
+                      }`}
+                    >
+                      <Globe2 className="w-3.5 h-3.5" />
+                      <span>All Entities</span>
+                      <span className="opacity-75">({allObjects.length})</span>
+                    </button>
+
+                    {categories.map((cat) => (
                       <button
                         key={cat.name}
                         type="button"
-                        onClick={() => {
-                          setSelectedCategory(cat.name);
-                          if (cat.items.length > 0) {
-                            setSelectedObjectIds([cat.items[0].id]);
-                          }
-                        }}
-                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center space-x-2 ${
-                          selectedCategory === cat.name
-                            ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                        onClick={() => setActiveFilterTab(cat.name)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
+                          activeFilterTab === cat.name
+                            ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]'
                             : 'bg-black/40 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/30'
                         }`}
                       >
-                        <Globe2 className="w-4 h-4" />
                         <span>{cat.name}</span>
-                        <span className="text-xs opacity-75 font-mono">({cat.items.length})</span>
+                        <span className="opacity-75">({cat.items.length})</span>
                       </button>
-                    ))
-                  )}
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilterTab('SELECTED')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
+                        activeFilterTab === 'SELECTED'
+                          ? 'bg-sky-500 text-black font-bold shadow-[0_0_15px_rgba(56,189,248,0.5)]'
+                          : 'bg-blue-950/40 text-sky-300 border border-blue-500/30 hover:border-blue-400'
+                      }`}
+                    >
+                      <span>Selected Mix</span>
+                      <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">
+                        {selectedObjectIds.length}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Search input */}
+                  <div className="relative w-full lg:w-72">
+                    <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search Mars, Andromeda..."
+                      className="w-full pl-9 pr-8 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-white text-xs outline-none transition-all placeholder-slate-500 font-mono"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
+              </div>
+
+              {/* Selected Mix Chips Drawer */}
+              <div className="p-4 rounded-2xl bg-[#050b18]/90 border border-blue-500/25 space-y-2.5 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
+                      Selected Mix ({selectedItems.length})
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[10px] font-mono">
+                      {effectiveCategory}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-3 text-xs font-mono">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllFiltered}
+                      className="text-blue-400 hover:text-sky-300 transition-colors"
+                    >
+                      Select All in View
+                    </button>
+                    <span className="text-slate-700">|</span>
+                    <button
+                      type="button"
+                      onClick={handleClearSelection}
+                      className="text-slate-500 hover:text-rose-400 transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {selectedItems.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic font-mono py-1">
+                    No celestial objects selected yet. Click any entity card below to add it to the quest mix.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {selectedItems.map((obj) => (
+                      <div
+                        key={obj.id}
+                        className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-blue-600/20 border border-blue-400/50 text-white text-xs font-medium shadow-[0_0_12px_rgba(37,99,235,0.2)] transition-all"
+                      >
+                        <span className="font-semibold">{obj.name}</span>
+                        <span className="text-[10px] font-mono text-blue-300 opacity-80 px-1 py-0.5 rounded bg-blue-900/60">
+                          {obj.category}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleObject(obj.id)}
+                          className="hover:text-rose-300 transition-colors pl-0.5"
+                          title={`Remove ${obj.name}`}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Entity Multi-Select Grid */}
               <div className="space-y-2 pt-2 border-t border-white/[0.08]">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
-                    2. Select Target Celestial Entities (Single or Multiple)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleSelectAllInCat}
-                    className="text-xs text-blue-400 hover:text-sky-300 font-medium transition-colors font-mono"
-                  >
-                    Select All in {selectedCategory}
-                  </button>
+                <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                  <span>Available Entities ({filteredObjects.length})</span>
+                  <span>Click any card to select / unselect</span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-60 overflow-y-auto pr-1">
-                  {activeCategoryGroup?.items.map((obj) => {
-                    const isSelected = selectedObjectIds.includes(obj.id);
-                    return (
-                      <div
-                        key={obj.id}
-                        onClick={() => handleToggleObject(obj.id)}
-                        className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center space-x-2.5 ${
-                          isSelected
-                            ? 'bg-blue-600/15 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.25)]'
-                            : 'bg-black/40 border-white/[0.06] text-slate-400 hover:border-blue-500/30 hover:text-slate-200'
-                        }`}
-                      >
+                {isLoadingCategories ? (
+                  <div className="py-12 flex flex-col items-center justify-center space-y-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-sky-400" />
+                    <p className="text-xs text-slate-400 font-mono">Loading celestial database...</p>
+                  </div>
+                ) : filteredObjects.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-500 font-mono">
+                    No celestial entities found matching &quot;{searchQuery}&quot;.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                    {filteredObjects.map((obj) => {
+                      const isSelected = selectedObjectIds.includes(obj.id);
+                      return (
                         <div
-                          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border ${
+                          key={obj.id}
+                          onClick={() => handleToggleObject(obj.id)}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center space-x-2.5 ${
                             isSelected
-                              ? 'bg-blue-600 border-blue-400 text-white'
-                              : 'border-slate-700 bg-black/40'
+                              ? 'bg-blue-600/15 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.25)]'
+                              : 'bg-black/40 border-white/[0.06] text-slate-400 hover:border-blue-500/30 hover:text-slate-200'
                           }`}
                         >
-                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          <div
+                            className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all ${
+                              isSelected
+                                ? 'bg-blue-600 border-blue-400 text-white'
+                                : 'border-slate-700 bg-black/40'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className="text-xs font-semibold truncate text-white">{obj.name}</p>
+                              <span className="text-[9px] font-mono text-blue-400/80 px-1 py-0.2 rounded bg-black/40 shrink-0">
+                                {obj.category}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 font-mono truncate">
+                              {obj.topicsCount} topics
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold truncate text-white">{obj.name}</p>
-                          <p className="text-[10px] text-slate-500 font-mono truncate">
-                            {obj.topicsCount} topics
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Parameters Grid */}
@@ -388,19 +574,19 @@ export default function NewQuestPage() {
               <div className="pt-4 flex justify-end">
                 <button
                   type="button"
-                  disabled={isGenerating}
+                  disabled={isGenerating || selectedObjectIds.length === 0}
                   onClick={handleGenerate}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_30px_rgba(37,99,235,0.45)] hover:shadow-[0_0_40px_rgba(37,99,235,0.65)] transition-all flex items-center justify-center space-x-2.5 active:scale-95 disabled:opacity-50"
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      <span>Synthesizing Unique Questions & Verifying Corpus...</span>
+                      <span>Synthesizing Quest Across {selectedItems.length} Entities...</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-blue-200" />
-                      <span>Synthesize Quest with AI</span>
+                      <span>Synthesize Quest for {selectedItems.length} Entities</span>
                     </>
                   )}
                 </button>
@@ -415,13 +601,13 @@ export default function NewQuestPage() {
               <div className="space-y-1">
                 <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-200 font-mono text-xs border border-blue-500/30">
                   <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
-                  <span>AI Quest Generated · Unique Cognitive Archetypes Active</span>
+                  <span>AI Quest Generated · Multi-Topic Synthesis Ready</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   Review & Customize Quest
                 </h2>
                 <p className="text-xs text-slate-400">
-                  You can edit any text inline, replace the cover artwork, or click &quot;Refresh Question&quot; to change individual items.
+                  Featuring: {generatedQuest.selectedObjectIds?.join(', ') || 'Mixed Selection'}. You can edit any question or click &quot;Refresh Question&quot; to change individual items.
                 </p>
               </div>
 
