@@ -20,26 +20,55 @@ export async function POST(req: NextRequest) {
 
     const { data: objects } = await supabase
       .from('CelestialObjects')
-      .select('name')
+      .select('id, name, category')
       .in('id', selectedObjectIds || []);
 
     const objectNames = (objects || []).map((o) => o.name);
+    const objMap = new Map((objects || []).map((o) => [o.id, o]));
 
     const { data: topics } = await supabase
       .from('Topics')
-      .select('id')
+      .select('id, objectId, title')
       .in('objectId', selectedObjectIds || []);
 
     const topicIds = (topics || []).map((t) => t.id);
+    const topicMap = new Map(
+      (topics || []).map((t) => [
+        t.id,
+        {
+          id: t.id,
+          title: t.title,
+          objectId: t.objectId,
+          objectName: objMap.get(t.objectId)?.name || 'Deep Space',
+          objectCategory: objMap.get(t.objectId)?.category || 'Cosmos',
+        },
+      ])
+    );
 
     let discoveries: any[] = [];
     if (topicIds.length > 0) {
       const { data: discs } = await supabase
         .from('Discoveries')
-        .select('title, body, subtitle, curiosityTitle, curiositySubtitle')
+        .select('id, topicId, title, body, subtitle, curiosityTitle, curiositySubtitle')
         .in('topicId', topicIds)
         .limit(40);
-      discoveries = discs || [];
+
+      discoveries = (discs || []).map((d) => {
+        const top = topicMap.get(d.topicId);
+        return {
+          id: d.id,
+          topicId: d.topicId,
+          topicTitle: top?.title || 'Astrophysics',
+          objectId: top?.objectId || '',
+          objectName: top?.objectName || (objectNames[0] || 'Cosmos'),
+          objectCategory: top?.objectCategory || 'Space',
+          title: d.title,
+          subtitle: d.subtitle,
+          body: d.body,
+          curiosityTitle: d.curiosityTitle,
+          curiositySubtitle: d.curiositySubtitle,
+        };
+      });
     }
 
     const question = await regenerateSingleQuestion({

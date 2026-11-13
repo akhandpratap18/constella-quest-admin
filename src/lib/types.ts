@@ -66,6 +66,21 @@ export interface DBDiscovery {
   curiositySubtitle?: string;
 }
 
+export interface EnrichedDiscovery {
+  id?: string;
+  topicId?: string;
+  topicTitle?: string;
+  objectId?: string;
+  objectName?: string;
+  objectCategory?: string;
+  title: string;
+  subtitle?: string;
+  body: string;
+  caption?: string;
+  curiosityTitle?: string;
+  curiositySubtitle?: string;
+}
+
 // UI Draft Types
 export type QuestionDifficulty = 'Easy' | 'Medium' | 'Hard' | 'Very Difficult';
 
