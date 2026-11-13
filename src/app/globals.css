@@ -1,35 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 245, 245, 245;
-  --background-start-rgb: 3, 6, 4;
-  --background-end-rgb: 1, 3, 2;
+  --foreground-rgb: 241, 245, 249;
+  --background-start-rgb: 3, 7, 18;
+  --background-end-rgb: 2, 5, 15;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #030604;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #030712;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  letter-spacing: -0.011em;
 }
 
-/* Custom emerald scrollbar */
+/* Custom Constella navy scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #040705;
+  background: #030712;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.25);
+  background: rgba(59, 130, 246, 0.3);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
+  background: rgba(59, 130, 246, 0.6);
+}
+
+/* Cross marker utility for AstSurgeon grid intersections */
+.tech-cross {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  user-select: none;
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 9px;
+  text-align: center;
 }

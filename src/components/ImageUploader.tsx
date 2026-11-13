@@ -61,23 +61,23 @@ export default function ImageUploader({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold uppercase tracking-wider text-emerald-400 font-mono">
-          Quest Hero Image
+        <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
+          Quest Cover Artwork
         </label>
         {defaultFallbackUrl && defaultFallbackUrl !== currentImageUrl && (
           <button
             type="button"
             onClick={() => onImageChange(defaultFallbackUrl)}
-            className="flex items-center space-x-1 text-xs text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+            className="flex items-center space-x-1 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Use Planet Official Artwork</span>
+            <span>Use Official Artwork</span>
           </button>
         )}
       </div>
 
       {currentImageUrl ? (
-        <div className="relative rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/60 shadow-glass-card group">
+        <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-black/60 shadow-glass-card group">
           <div className="aspect-[16/9] sm:aspect-[21/9] w-full relative overflow-hidden flex items-center justify-center bg-black">
             <img
               src={currentImageUrl}
@@ -91,14 +91,14 @@ export default function ImageUploader({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-black/70 hover:bg-black/90 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-xs font-medium transition-all shadow-md"
+              className="px-3 py-1.5 rounded-lg bg-black/80 hover:bg-black/95 backdrop-blur-md border border-blue-500/40 text-blue-300 text-xs font-medium transition-all shadow-md"
             >
               Replace Image
             </button>
             <button
               type="button"
               onClick={() => onImageChange('')}
-              className="p-1.5 rounded-lg bg-black/70 hover:bg-rose-500/20 backdrop-blur-md border border-zinc-700 hover:border-rose-500/40 text-zinc-400 hover:text-rose-400 text-xs transition-all"
+              className="p-1.5 rounded-lg bg-black/80 hover:bg-rose-500/20 backdrop-blur-md border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-xs transition-all"
             >
               <X className="w-4 h-4" />
             </button>
@@ -115,25 +115,25 @@ export default function ImageUploader({
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center cursor-pointer transition-all ${
             dragOver
-              ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_25px_rgba(16,185,129,0.25)]'
-              : 'border-emerald-500/25 bg-black/30 hover:border-emerald-500/50 hover:bg-emerald-950/20'
+              ? 'border-blue-400 bg-blue-500/10 shadow-[0_0_25px_rgba(37,99,235,0.25)]'
+              : 'border-white/[0.08] bg-black/30 hover:border-blue-500/40 hover:bg-blue-950/20'
           }`}
         >
           {isUploading ? (
             <div className="flex flex-col items-center space-y-2">
-              <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
-              <p className="text-xs text-emerald-300 font-mono">Uploading to Supabase Storage...</p>
+              <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+              <p className="text-xs text-blue-300 font-mono">Uploading to Supabase Storage...</p>
             </div>
           ) : (
             <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-inner">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-inner">
                 <UploadCloud className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-sm font-medium text-white">
-                  Drop quest cover image here, or <span className="text-emerald-400 underline">browse</span>
+                  Drop quest cover image here, or <span className="text-blue-400 underline">browse</span>
                 </p>
-                <p className="text-xs text-zinc-400 mt-0.5">High-res PNG, JPG, or WebP (16:9 recommended)</p>
+                <p className="text-xs text-slate-400 mt-0.5">High-res PNG, JPG, or WebP (16:9 recommended)</p>
               </div>
             </div>
           )}

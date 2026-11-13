@@ -80,6 +80,7 @@ export interface QuestionDraft {
   text: string;
   explanation: string;
   interestingFact: string;
+  archetype?: string;
   options: QuestionOptionDraft[];
 }
 

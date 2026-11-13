@@ -11,13 +11,10 @@ import {
   Loader2, 
   Check, 
   Plus, 
-  Calendar, 
-  Clock, 
-  Layers, 
-  Trash2,
   AlertCircle
 } from 'lucide-react';
 import { QuestDraft, QuestionDraft } from '@/lib/types';
+import { QUESTION_ARCHETYPES } from '@/lib/openai';
 
 export default function EditQuestPage() {
   const router = useRouter();
@@ -68,14 +65,15 @@ export default function EditQuestPage() {
     const blank: QuestionDraft = {
       id: `manual_${Date.now()}_${newIdx}`,
       orderIndex: newIdx,
-      text: 'New Astronomy Question',
+      archetype: QUESTION_ARCHETYPES[(newIdx - 1) % QUESTION_ARCHETYPES.length],
+      text: 'New Astronomy Question Inquiry',
       explanation: 'Explanation for why this is the correct answer.',
       interestingFact: 'Fascinating space fact.',
       options: [
-        { id: `opt_${Date.now()}_A`, prefix: 'A', text: 'Option A', isCorrect: true },
-        { id: `opt_${Date.now()}_B`, prefix: 'B', text: 'Option B', isCorrect: false },
-        { id: `opt_${Date.now()}_C`, prefix: 'C', text: 'Option C', isCorrect: false },
-        { id: `opt_${Date.now()}_D`, prefix: 'D', text: 'Option D', isCorrect: false },
+        { id: `opt_${Date.now()}_A`, prefix: 'A', text: 'Verified Option A', isCorrect: true },
+        { id: `opt_${Date.now()}_B`, prefix: 'B', text: 'Alternative Option B', isCorrect: false },
+        { id: `opt_${Date.now()}_C`, prefix: 'C', text: 'Alternative Option C', isCorrect: false },
+        { id: `opt_${Date.now()}_D`, prefix: 'D', text: 'Alternative Option D', isCorrect: false },
       ],
     };
     setQuest({ ...quest, questions: [...quest.questions, blank] });
@@ -114,8 +112,8 @@ export default function EditQuestPage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
-          <p className="text-sm text-zinc-400 font-mono">Loading Quest from Supabase...</p>
+          <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+          <p className="text-sm text-slate-400 font-mono">Loading Quest from Supabase...</p>
         </div>
       </div>
     );
@@ -130,7 +128,7 @@ export default function EditQuestPage() {
           <h2 className="text-lg font-bold text-white">Quest Not Found</h2>
           <button
             onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 rounded-xl bg-emerald-500 text-black font-semibold text-xs"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"
           >
             Return to Dashboard
           </button>
@@ -147,20 +145,20 @@ export default function EditQuestPage() {
         {/* Back Link */}
         <button
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center space-x-1.5 text-xs text-zinc-400 hover:text-emerald-400 transition-colors font-mono"
+          className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to All Quests</span>
         </button>
 
         {/* Top Header Card */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#09150e]/90 backdrop-blur-xl border border-emerald-500/30 shadow-glass-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#080e1c]/90 backdrop-blur-xl border border-white/[0.08] shadow-glass-card">
           <div className="space-y-1">
-            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-xs border border-emerald-500/30">
+            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
               <span>Editing Quest #{quest.weekNumber} · {quest.status}</span>
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">{quest.title}</h1>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-400">
               Make adjustments to quest timing, status, questions, or regenerate individual questions with AI.
             </p>
           </div>
@@ -169,21 +167,21 @@ export default function EditQuestPage() {
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-bold text-sm shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(37,99,235,0.45)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>Saving to Supabase...</span>
               </>
             ) : saveSuccess ? (
               <>
-                <Check className="w-4 h-4 text-black stroke-[3]" />
+                <Check className="w-4 h-4 text-white stroke-[3]" />
                 <span>Changes Saved!</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-black" />
+                <Save className="w-4 h-4 text-white" />
                 <span>Save Changes</span>
               </>
             )}
@@ -198,71 +196,71 @@ export default function EditQuestPage() {
 
         {/* Quest Info & Image Card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 rounded-3xl bg-[#09150e]/80 backdrop-blur-xl border border-emerald-500/20 p-5 shadow-glass-card">
+          <div className="lg:col-span-1 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-5 shadow-glass-card">
             <ImageUploader
               currentImageUrl={quest.imageUrl}
               onImageChange={(url) => setQuest({ ...quest, imageUrl: url })}
             />
           </div>
 
-          <div className="lg:col-span-2 rounded-3xl bg-[#09150e]/80 backdrop-blur-xl border border-emerald-500/20 p-6 shadow-glass-card space-y-4">
+          <div className="lg:col-span-2 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-6 shadow-glass-card space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-emerald-400 font-mono">
+              <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
                 Quest Title
               </label>
               <input
                 type="text"
                 value={quest.title}
                 onChange={(e) => setQuest({ ...quest, title: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-emerald-500/25 focus:border-emerald-400 text-white font-bold text-base outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-white font-bold text-base outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-emerald-400 font-mono">
+              <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
                 Quest Description
               </label>
               <textarea
                 rows={2}
                 value={quest.description}
                 onChange={(e) => setQuest({ ...quest, description: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl bg-black/40 border border-emerald-500/25 focus:border-emerald-400 text-zinc-300 text-xs outline-none resize-none"
+                className="w-full px-4 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-slate-300 text-xs outline-none resize-none leading-relaxed"
               />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-zinc-400">Week Number</label>
+                <label className="text-[11px] font-mono text-slate-400">Week Number</label>
                 <input
                   type="number"
                   value={quest.weekNumber}
                   onChange={(e) => setQuest({ ...quest, weekNumber: Number(e.target.value) })}
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-emerald-500/20 text-white text-xs font-mono"
+                  className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-zinc-400">Date Range</label>
+                <label className="text-[11px] font-mono text-slate-400">Date Range</label>
                 <input
                   type="text"
                   value={quest.dateRangeString}
                   onChange={(e) => setQuest({ ...quest, dateRangeString: e.target.value })}
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-emerald-500/20 text-white text-xs font-mono"
+                  className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-zinc-400">Duration</label>
+                <label className="text-[11px] font-mono text-slate-400">Duration</label>
                 <input
                   type="text"
                   value={quest.durationString}
                   onChange={(e) => setQuest({ ...quest, durationString: e.target.value })}
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-emerald-500/20 text-white text-xs font-mono"
+                  className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-zinc-400">Status</label>
+                <label className="text-[11px] font-mono text-slate-400">Status</label>
                 <select
                   value={quest.status}
                   onChange={(e) =>
@@ -271,7 +269,7 @@ export default function EditQuestPage() {
                       status: e.target.value as 'Active' | 'Upcoming' | 'Completed',
                     })
                   }
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-emerald-500/20 text-white text-xs font-mono outline-none"
+                  className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono outline-none"
                 >
                   <option value="Active">Active (Live in App)</option>
                   <option value="Upcoming">Upcoming</option>
@@ -284,10 +282,10 @@ export default function EditQuestPage() {
 
         {/* Questions Editor List */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-emerald-500/15 pb-3">
+          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
             <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-bold text-white">Questions Bank</h3>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 font-mono text-xs border border-emerald-500/30">
+              <h3 className="text-lg font-bold text-white tracking-tight">Questions Bank</h3>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
                 {quest.questions.length} Items
               </span>
             </div>
@@ -295,7 +293,7 @@ export default function EditQuestPage() {
             <button
               type="button"
               onClick={handleAddQuestion}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-medium transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.1] hover:border-blue-500/40 text-blue-300 hover:text-white text-xs font-medium transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Question</span>
@@ -320,8 +318,8 @@ export default function EditQuestPage() {
         </div>
 
         {/* Sticky Save Bar */}
-        <div className="sticky bottom-6 z-40 p-4 rounded-2xl bg-[#06100a]/95 backdrop-blur-2xl border border-emerald-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(16,185,129,0.3)] flex items-center justify-between">
-          <span className="text-xs text-zinc-400 font-mono">
+        <div className="sticky bottom-6 z-40 p-4 rounded-2xl bg-[#040816]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(37,99,235,0.3)] flex items-center justify-between">
+          <span className="text-xs text-slate-400 font-mono">
             {quest.questions.length} questions in this quest set.
           </span>
 
@@ -329,21 +327,21 @@ export default function EditQuestPage() {
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>Saving to Supabase...</span>
               </>
             ) : saveSuccess ? (
               <>
-                <Check className="w-4 h-4 text-black stroke-[3]" />
+                <Check className="w-4 h-4 text-white stroke-[3]" />
                 <span>Saved!</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-black" />
+                <Save className="w-4 h-4 text-white" />
                 <span>Save All Changes</span>
               </>
             )}
