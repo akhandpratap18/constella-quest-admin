@@ -6,7 +6,10 @@ function getOpenAIClient(customApiKey?: string): OpenAI | null {
   if (!apiKey || apiKey.trim() === '' || apiKey.includes('your-openai-api-key')) {
     return null;
   }
-  return new OpenAI({ apiKey: apiKey.trim() });
+  return new OpenAI({
+    apiKey: apiKey.trim(),
+    fetch: typeof globalThis.fetch === 'function' ? globalThis.fetch : undefined,
+  });
 }
 
 export interface GenerateQuestParams {
