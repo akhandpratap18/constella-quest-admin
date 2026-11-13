@@ -76,6 +76,10 @@ TARGET SCOPE:
 VERIFIED DISCOVERY CORPUS:
 ${formattedDiscoveries.slice(0, 12000)}
 
+CRITICAL GROUNDING & DATA INTEGRITY MANDATE:
+- 100% EXCLUSIVE SUPABASE SOURCE: All questions, correct answers, scientific explanations, and trivia MUST be strictly and exclusively derived from the VERIFIED DISCOVERY CORPUS provided above.
+- NO OUTSIDE FACTS OR HALLUCINATIONS: Do not introduce external facts, missions, or details that are not directly supported by the corpus text. The quiz must test users purely on the verified discoveries stored in the Constella database.
+
 CRITICAL UNIQUENESS & DIVERSITY MANDATE:
 - NO COOKIE-CUTTER TEMPLATES: Every single question MUST come up as completely unique in its own right, with its own distinct structure, sentence opening, cognitive angle, and linguistic cadence, even if all questions are derived from the exact same source discovery or object.
 - MULTI-OBJECT / MIXED TOPIC COVERAGE: If multiple objects are specified (${params.selectedObjectNames.join(', ')}), alternate questions across ALL chosen objects and categories so every selected entity is represented in the quest.
@@ -199,10 +203,11 @@ VERIFIED CORPUS:
 ${formattedDiscoveries.slice(0, 6000)}
 
 REQUIREMENTS:
-1. Formulate a novel, unique question distinctly framed around the archetype "${archetype}".
-2. NEVER use repetitive openings like "What is..." or "Which of the following...". Use dynamic inquiry phrasing.
-3. 4 options (A, B, C, D) with EXACTLY ONE option having isCorrect: true. Randomize which letter (A, B, C, or D) is correct.
-4. Detailed explanation and a fascinating "Did you know?" trivia item.
+1. Formulate a novel, unique question derived EXCLUSIVELY from the VERIFIED CORPUS above (from the Supabase database). Do not introduce outside facts or unverified details.
+2. Distinctly frame the question around the archetype "${archetype}".
+3. NEVER use repetitive openings like "What is..." or "Which of the following...". Use dynamic inquiry phrasing.
+4. 4 options (A, B, C, D) with EXACTLY ONE option having isCorrect: true. Randomize which letter (A, B, C, or D) is correct.
+5. Detailed explanation and a fascinating "Did you know?" trivia item, both directly grounded in the provided corpus.
 
 RETURN STRICTLY JSON:
 {
