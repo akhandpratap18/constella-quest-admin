@@ -137,22 +137,15 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Model Pill Badge with 8px glowing status dot */}
+            {/* API Key Settings Button */}
             <button
               type="button"
               onClick={() => setIsOpenAiModalOpen(true)}
-              className="pill-badge hidden md:inline-flex items-center space-x-2 px-3 py-1 hover:brightness-110 transition-all cursor-pointer"
-              title="Click to view or update OpenAI GPT-4o API Key"
+              className="btn-glass hidden md:inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs text-[#9CA3AF] hover:text-white"
+              title="Configure OpenAI API Key"
             >
-              <span
-                className={`status-dot ${
-                  isConfigured ? 'bg-[#5B8CFF] text-[#5B8CFF]' : 'bg-amber-400 text-amber-400'
-                }`}
-              />
-              <span className="font-mono text-[11px] font-medium tracking-wide">
-                {isConfigured ? 'GPT-4o ACTIVE' : 'CONNECT OPENAI'}
-              </span>
-              {maskedKey && <span className="text-[10px] text-[#9CA3AF] opacity-80">({maskedKey})</span>}
+              <KeyRound className="w-3.5 h-3.5 text-[#5B8CFF]" />
+              <span className="font-mono text-[11px]">API Key</span>
             </button>
 
             {/* Glass Header Button: GitHub */}

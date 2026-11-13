@@ -78,9 +78,68 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-10">
+        {/* CURRICULUM TIMELINE AT VERY TOP */}
+        <section className="glass-panel p-4 sm:p-5 relative overflow-hidden animate-fade-up">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-9 h-9 rounded-xl bg-[#2F5BFF]/15 border border-[#5B8CFF]/30 flex items-center justify-center shrink-0">
+                <Calendar className="w-4 h-4 text-[#5B8CFF]" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#6B7280]">
+                    Weekly Curriculum Timeline
+                  </span>
+                  <span className="status-dot bg-[#5B8CFF] text-[#5B8CFF]" />
+                </div>
+                <h2 className="text-sm font-semibold text-white">
+                  {activeQuest ? `Currently Live: Week ${activeQuest.weekNumber} · ${activeQuest.title}` : 'All Quests Deployment Track'}
+                </h2>
+              </div>
+            </div>
+
+            {/* Stepper Timeline Nodes */}
+            <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto py-1">
+              {quests.slice(0, 5).map((q, idx) => (
+                <React.Fragment key={q.id}>
+                  {idx > 0 && <div className="w-4 h-px bg-white/[0.14] hidden sm:block shrink-0" />}
+                  <Link
+                    href={`/dashboard/edit/${q.id}`}
+                    className={`flex items-center space-x-2.5 px-3 py-1.5 rounded-xl border transition-all hover:border-white/[0.2] ${
+                      q.status === 'Active'
+                        ? 'bg-[#2F5BFF]/15 border-[#5B8CFF] text-white shadow-[0_0_15px_rgba(47,91,255,0.25)]'
+                        : 'bg-white/[0.03] border-white/[0.08] text-[#9CA3AF]'
+                    }`}
+                  >
+                    <span className="w-5 h-5 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-[10px] font-mono font-bold text-[#5B8CFF]">
+                      W{q.weekNumber}
+                    </span>
+                    <div className="flex flex-col text-left max-w-[110px]">
+                      <span className="text-xs font-semibold truncate text-white">{q.title}</span>
+                      <span className="text-[9px] font-mono text-[#6B7280] truncate">
+                        {q.status}
+                      </span>
+                    </div>
+                  </Link>
+                </React.Fragment>
+              ))}
+
+              <div className="w-4 h-px bg-white/[0.14] hidden sm:block shrink-0" />
+
+              {/* Next Up Slot */}
+              <Link
+                href="/dashboard/new"
+                className="btn-glass flex items-center space-x-2 px-3 py-1.5 text-xs font-mono text-[#5B8CFF] hover:text-white shrink-0"
+              >
+                <span>+ Week {maxWeek + 1}</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section matching Design Spec: Centered, clamp(3rem, 7vw, 5.5rem), gray gradient 2nd line, formula pill */}
-        <section className="text-center flex flex-col items-center space-y-5 pt-4 pb-2 animate-fade-up">
+        <section className="text-center flex flex-col items-center space-y-5 pt-2 pb-2 animate-fade-up">
           {/* Mono Label */}
           <div className="pill-badge inline-flex items-center space-x-2 px-3.5 py-1">
             <span className="status-dot bg-[#5B8CFF] text-[#5B8CFF]" />
@@ -104,7 +163,7 @@ export default function DashboardPage() {
           <div className="formula-pill inline-flex items-center space-x-2 px-4 py-1.5 shadow-sm">
             <span>SUPABASE DISCOVERIES</span>
             <span className="text-[#6B7280]">→</span>
-            <span className="text-white">GPT-4o CURATION</span>
+            <span className="text-white">AI CURATION</span>
             <span className="text-[#6B7280]">→</span>
             <span className="text-[#5B8CFF]">CONSTELLA IOS APP</span>
           </div>
