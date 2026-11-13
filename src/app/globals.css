@@ -1,52 +1,179 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 248, 250, 252;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 2, 4, 12;
+  --bg: #050608;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --navy-900: #0A1128;
+  --navy-700: #10265C;
+  --blue-500: #2F5BFF;
+  --blue-400: #5B8CFF;
+  --blue-glow: rgba(47, 91, 255, 0.18);
+  --text: #FFFFFF;
+  --text-muted: #9CA3AF;
+  --text-dim: #6B7280;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: #000000;
+  color: var(--text);
+  background: var(--bg);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   letter-spacing: -0.015em;
+  min-height: 100vh;
 }
 
-/* Custom Constella Royal Navy scrollbar */
+/* Glass Panels per Design Spec */
+.glass-panel {
+  border-radius: 28px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 20px 60px rgba(0, 0, 0, 0.5);
+  background-image: linear-gradient(180deg, rgba(47, 91, 255, 0.08), transparent 30%);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 70px rgba(0, 0, 0, 0.6), 0 0 30px rgba(47, 91, 255, 0.18);
+}
+
+/* Glass Sub-card / Mini-cards */
+.glass-card-sm {
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Hero Typography Gradient (Line 2) */
+.headline-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, #6B7280 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Pill Badges */
+.pill-badge {
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background-color: rgba(47, 91, 255, 0.12);
+  border: 1px solid rgba(91, 140, 255, 0.35);
+  color: var(--blue-400);
+}
+
+/* Technical Formula Pill */
+.formula-pill {
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+/* Primary CTA Button */
+.btn-primary-cta {
+  background: linear-gradient(135deg, #2F5BFF 0%, #10265C 100%);
+  color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(47, 91, 255, 0.35);
+  border: 1px solid rgba(91, 140, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary-cta:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 10px 36px rgba(47, 91, 255, 0.5);
+}
+
+.btn-primary-cta:active {
+  transform: scale(0.98);
+}
+
+/* Glass Header / Action Button */
+.btn-glass {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.btn-glass:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 24px rgba(47, 91, 255, 0.25);
+}
+
+/* Status Dot with Glow */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Segmented Tabs Container */
+.segmented-tabs-container {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 4px;
+}
+
+.segmented-tab-active {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.segmented-tab-inactive {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+}
+
+.segmented-tab-inactive:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Modern Minimal Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(37, 99, 235, 0.35);
+  background: rgba(47, 91, 255, 0.3);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(37, 99, 235, 0.65);
-}
-
-/* Subtle cross marker utility for grid intersections */
-.tech-cross {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  color: rgba(59, 130, 246, 0.25);
-  pointer-events: none;
-  user-select: none;
-  font-family: monospace;
-  font-size: 11px;
-  line-height: 9px;
-  text-align: center;
+  background: rgba(47, 91, 255, 0.6);
 }

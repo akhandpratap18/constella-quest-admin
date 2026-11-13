@@ -130,8 +130,8 @@ export default function EditQuestPage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-          <p className="text-sm text-slate-400 font-mono">Loading Quest from Supabase...</p>
+          <Loader2 className="w-7 h-7 text-[#5B8CFF] animate-spin" />
+          <p className="text-xs text-[#9CA3AF] font-mono">Loading Quest from Supabase...</p>
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ export default function EditQuestPage() {
           <h2 className="text-lg font-bold text-white">Quest Not Found</h2>
           <button
             onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"
+            className="btn-primary-cta px-4 py-2 text-xs font-mono"
           >
             Return to Dashboard
           </button>
@@ -159,25 +159,32 @@ export default function EditQuestPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Back Link */}
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors font-mono"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to All Quests</span>
-        </button>
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-fade-up">
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="btn-glass inline-flex items-center space-x-2 px-3.5 py-1.5 text-xs text-[#9CA3AF] hover:text-white font-mono"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to All Quests</span>
+          </button>
+
+          <div className="formula-pill text-xs px-3 py-1">
+            <span>WEEK {quest.weekNumber} · {quest.status.toUpperCase()}</span>
+          </div>
+        </div>
 
         {/* Top Header Card */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#080e1c]/90 backdrop-blur-xl border border-white/[0.08] shadow-glass-card">
-          <div className="space-y-1">
-            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
-              <span>Editing Quest #{quest.weekNumber} · {quest.status}</span>
+        <div className="glass-panel p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="pill-badge inline-flex items-center space-x-1.5 px-3 py-0.5 text-[11px]">
+              <span className="status-dot bg-[#5B8CFF] text-[#5B8CFF]" />
+              <span>Editing Quest #{quest.weekNumber}</span>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{quest.title}</h1>
-            <p className="text-xs text-slate-400">
-              Make adjustments to quest timing, status, questions, or regenerate individual questions with AI.
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{quest.title}</h1>
+            <p className="text-xs text-[#9CA3AF] max-w-xl">
+              Make adjustments to quest timing, status, questions, or regenerate individual inquiries with AI.
             </p>
           </div>
 
@@ -185,70 +192,70 @@ export default function EditQuestPage() {
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(37,99,235,0.45)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+            className="btn-primary-cta px-6 py-2.5 text-xs font-mono font-semibold flex items-center space-x-2 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                 <span>Saving to Supabase...</span>
               </>
             ) : saveSuccess ? (
               <>
-                <Check className="w-4 h-4 text-white stroke-[3]" />
+                <Check className="w-3.5 h-3.5 text-white" />
                 <span>Changes Saved!</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-white" />
-                <span>Save Changes</span>
+                <Save className="w-3.5 h-3.5 text-white" />
+                <span>Save All Changes</span>
               </>
             )}
           </button>
         </div>
 
         {errorMessage && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm font-mono">
+          <div className="glass-card-sm p-4 border-rose-500/30 text-rose-300 text-xs font-mono">
             {errorMessage}
           </div>
         )}
 
         {/* Quest Info & Image Card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-5 shadow-glass-card">
+          <div className="lg:col-span-1 glass-panel p-5">
             <ImageUploader
               currentImageUrl={quest.imageUrl}
               onImageChange={(url) => setQuest({ ...quest, imageUrl: url })}
             />
           </div>
 
-          <div className="lg:col-span-2 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-6 shadow-glass-card space-y-4">
+          <div className="lg:col-span-2 glass-panel p-6 space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
+              <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">
                 Quest Title
               </label>
               <input
                 type="text"
                 value={quest.title}
                 onChange={(e) => setQuest({ ...quest, title: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-white font-bold text-base outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] focus:border-[#5B8CFF] text-white font-bold text-sm outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
+              <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">
                 Quest Description
               </label>
               <textarea
                 rows={2}
                 value={quest.description}
                 onChange={(e) => setQuest({ ...quest, description: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-slate-300 text-xs outline-none resize-none leading-relaxed"
+                className="w-full px-4 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-[#5B8CFF] text-[#9CA3AF] text-xs outline-none resize-none leading-relaxed"
               />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-slate-400">Week Number</label>
+                <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">Week</label>
                 <input
                   type="number"
                   value={quest.weekNumber}
@@ -258,7 +265,7 @@ export default function EditQuestPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-slate-400">Date Range</label>
+                <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">Dates</label>
                 <input
                   type="text"
                   value={quest.dateRangeString}
@@ -268,7 +275,7 @@ export default function EditQuestPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-slate-400">Duration</label>
+                <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">Duration</label>
                 <input
                   type="text"
                   value={quest.durationString}
@@ -278,7 +285,7 @@ export default function EditQuestPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-slate-400">Status</label>
+                <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">Status</label>
                 <select
                   value={quest.status}
                   onChange={(e) =>
@@ -302,31 +309,35 @@ export default function EditQuestPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-bold text-white tracking-tight">Questions Bank</h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
+              <h3 className="text-lg font-semibold text-white tracking-tight">Questions Bank</h3>
+              <span className="formula-pill px-2.5 py-0.5 text-[11px]">
                 {quest.questions.length} Items
               </span>
 
               {/* Bandwidth Breakdown */}
               <div className="flex flex-wrap items-center gap-1.5 ml-1">
                 {difficultyStats.easy > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[10px] font-mono">
-                    🌱 {difficultyStats.easy} Easy
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono">
+                    <span className="status-dot bg-emerald-400 text-emerald-400" />
+                    <span>{difficultyStats.easy} Easy</span>
                   </span>
                 )}
                 {difficultyStats.medium > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-300 text-[10px] font-mono">
-                    ⚡ {difficultyStats.medium} Medium
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-[10px] font-mono">
+                    <span className="status-dot bg-amber-400 text-amber-400" />
+                    <span>{difficultyStats.medium} Medium</span>
                   </span>
                 )}
                 {difficultyStats.hard > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-violet-950/60 border border-violet-500/40 text-violet-300 text-[10px] font-mono">
-                    🔥 {difficultyStats.hard} Hard
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-violet-950/40 border border-violet-500/30 text-violet-300 text-[10px] font-mono">
+                    <span className="status-dot bg-violet-400 text-violet-400" />
+                    <span>{difficultyStats.hard} Hard</span>
                   </span>
                 )}
                 {difficultyStats.veryHard > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/40 text-rose-300 text-[10px] font-mono">
-                    💀 {difficultyStats.veryHard} Very Hard
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-rose-950/40 border border-rose-500/30 text-rose-300 text-[10px] font-mono">
+                    <span className="status-dot bg-rose-400 text-rose-400" />
+                    <span>{difficultyStats.veryHard} Very Hard</span>
                   </span>
                 )}
               </div>
@@ -335,14 +346,14 @@ export default function EditQuestPage() {
             <button
               type="button"
               onClick={handleAddQuestion}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.1] hover:border-blue-500/40 text-blue-300 hover:text-white text-xs font-medium transition-colors self-start sm:self-auto"
+              className="btn-glass inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs text-[#9CA3AF] hover:text-white self-start sm:self-auto font-mono"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Question</span>
             </button>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {quest.questions.map((q, idx) => (
               <QuestionEditorCard
                 key={q.id || idx}
@@ -360,8 +371,8 @@ export default function EditQuestPage() {
         </div>
 
         {/* Sticky Save Bar */}
-        <div className="sticky bottom-6 z-40 p-4 rounded-2xl bg-[#040816]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(37,99,235,0.3)] flex items-center justify-between">
-          <span className="text-xs text-slate-400 font-mono">
+        <div className="sticky bottom-6 z-40 glass-panel p-4 flex items-center justify-between">
+          <span className="text-xs text-[#9CA3AF] font-mono">
             {quest.questions.length} questions in this quest set.
           </span>
 
@@ -369,21 +380,21 @@ export default function EditQuestPage() {
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+            className="btn-primary-cta px-6 py-2.5 text-xs font-mono font-semibold flex items-center space-x-2 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                 <span>Saving to Supabase...</span>
               </>
             ) : saveSuccess ? (
               <>
-                <Check className="w-4 h-4 text-white stroke-[3]" />
+                <Check className="w-3.5 h-3.5 text-white" />
                 <span>Saved!</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-white" />
+                <Save className="w-3.5 h-3.5 text-white" />
                 <span>Save All Changes</span>
               </>
             )}

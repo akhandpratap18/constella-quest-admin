@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { UploadCloud, Image as ImageIcon, Check, Loader2, Sparkles, X } from 'lucide-react';
+import { UploadCloud, Sparkles, X, Loader2 } from 'lucide-react';
 
 interface ImageUploaderProps {
   currentImageUrl: string;
@@ -59,26 +59,26 @@ export default function ImageUploader({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
-          Quest Cover Artwork
+        <label className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#6B7280]">
+          Cover Artwork
         </label>
         {defaultFallbackUrl && defaultFallbackUrl !== currentImageUrl && (
           <button
             type="button"
             onClick={() => onImageChange(defaultFallbackUrl)}
-            className="flex items-center space-x-1 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            className="btn-glass px-2.5 py-0.5 text-[11px] font-mono text-[#5B8CFF] hover:text-white flex items-center space-x-1"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Use Official Artwork</span>
+            <Sparkles className="w-3 h-3 text-[#5B8CFF]" />
+            <span>Official Artwork</span>
           </button>
         )}
       </div>
 
       {currentImageUrl ? (
-        <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-black/60 shadow-glass-card group">
-          <div className="aspect-[16/9] sm:aspect-[21/9] w-full relative overflow-hidden flex items-center justify-center bg-black">
+        <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-black/60 group">
+          <div className="aspect-[16/9] w-full relative overflow-hidden flex items-center justify-center bg-black">
             <img
               src={currentImageUrl}
               alt="Quest Cover"
@@ -87,20 +87,20 @@ export default function ImageUploader({
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
           </div>
 
-          <div className="absolute bottom-3 right-3 flex items-center space-x-2">
+          <div className="absolute bottom-2.5 right-2.5 flex items-center space-x-1.5">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-black/80 hover:bg-black/95 backdrop-blur-md border border-blue-500/40 text-blue-300 text-xs font-medium transition-all shadow-md"
+              className="btn-glass px-2.5 py-1 text-xs font-mono text-[#9CA3AF] hover:text-white"
             >
-              Replace Image
+              Replace
             </button>
             <button
               type="button"
               onClick={() => onImageChange('')}
-              className="p-1.5 rounded-lg bg-black/80 hover:bg-rose-500/20 backdrop-blur-md border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-xs transition-all"
+              className="btn-glass p-1.5 text-[#6B7280] hover:text-rose-400 hover:border-rose-500/30 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -113,27 +113,27 @@ export default function ImageUploader({
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center cursor-pointer transition-all ${
+          className={`border border-dashed rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
             dragOver
-              ? 'border-blue-400 bg-blue-500/10 shadow-[0_0_25px_rgba(37,99,235,0.25)]'
-              : 'border-white/[0.08] bg-black/30 hover:border-blue-500/40 hover:bg-blue-950/20'
+              ? 'border-[#5B8CFF] bg-[#2F5BFF]/10 shadow-[0_0_24px_rgba(47,91,255,0.25)]'
+              : 'border-white/[0.08] bg-black/40 hover:border-white/[0.16] hover:bg-white/[0.02]'
           }`}
         >
           {isUploading ? (
             <div className="flex flex-col items-center space-y-2">
-              <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-              <p className="text-xs text-blue-300 font-mono">Uploading to Supabase Storage...</p>
+              <Loader2 className="w-6 h-6 text-[#5B8CFF] animate-spin" />
+              <p className="text-xs text-[#9CA3AF] font-mono">Uploading to Supabase...</p>
             </div>
           ) : (
             <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-inner">
-                <UploadCloud className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#5B8CFF]">
+                <UploadCloud className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">
-                  Drop quest cover image here, or <span className="text-blue-400 underline">browse</span>
+                <p className="text-xs font-medium text-white">
+                  Drop artwork here, or <span className="text-[#5B8CFF] underline">browse</span>
                 </p>
-                <p className="text-xs text-slate-400 mt-0.5">High-res PNG, JPG, or WebP (16:9 recommended)</p>
+                <p className="text-[10px] text-[#6B7280] font-mono mt-0.5">PNG, JPG, or WebP</p>
               </div>
             </div>
           )}

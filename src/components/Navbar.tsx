@@ -12,7 +12,8 @@ import {
   Check, 
   Loader2, 
   X,
-  Cpu
+  Cpu,
+  Github
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -92,142 +93,157 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#040816]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#050608]/85 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Brand Logo */}
-          <Link href="/dashboard" className="flex items-center space-x-3 group">
-            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.45)] group-hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] transition-all">
-              <Compass className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg tracking-wider text-white">CONSTELLA</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">
-                  Admin AI
+          {/* Logo & Product Name + Dot Separator + Muted Tagline */}
+          <div className="flex items-center space-x-3">
+            <Link href="/dashboard" className="flex items-center space-x-3 group">
+              <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-[#2F5BFF] to-[#10265C] border border-white/[0.14] flex items-center justify-center shadow-[0_0_20px_rgba(47,91,255,0.4)] group-hover:shadow-[0_0_28px_rgba(47,91,255,0.65)] transition-all">
+                <Compass className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex items-center space-x-2.5">
+                <span className="font-bold text-base tracking-tight text-white">CONSTELLA</span>
+                <span className="text-xs text-[#6B7280]">·</span>
+                <span className="hidden sm:inline text-xs text-[#9CA3AF] tracking-normal font-sans">
+                  Cosmic Curriculum Architect
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-mono">Cosmic Quest Engine</span>
+            </Link>
+          </div>
+
+          {/* Navigation Links & Glass Header Buttons */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Segmented Nav Tabs */}
+            <div className="segmented-tabs-container flex items-center">
+              <Link
+                href="/dashboard"
+                className={`px-3 py-1 text-xs font-medium transition-all ${
+                  pathname === '/dashboard'
+                    ? 'segmented-tab-active'
+                    : 'segmented-tab-inactive'
+                }`}
+              >
+                All Quests
+              </Link>
+              <Link
+                href="/dashboard/new"
+                className={`px-3 py-1 text-xs font-medium transition-all ${
+                  pathname.startsWith('/dashboard/new')
+                    ? 'segmented-tab-active'
+                    : 'segmented-tab-inactive'
+                }`}
+              >
+                Quest Studio
+              </Link>
             </div>
-          </Link>
 
-          {/* Navigation Actions */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <Link
-              href="/dashboard"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                pathname === '/dashboard'
-                  ? 'bg-blue-500/15 text-blue-200 border border-blue-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
-              }`}
-            >
-              All Quests
-            </Link>
-
-            <Link
-              href="/dashboard/new"
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all font-semibold"
-            >
-              <Sparkles className="w-4 h-4 text-blue-200" />
-              <span>Generate Quest</span>
-            </Link>
-
-            {/* Model / OpenAI Key Status Button */}
+            {/* Model Pill Badge with 8px glowing status dot */}
             <button
               type="button"
               onClick={() => setIsOpenAiModalOpen(true)}
-              className={`hidden sm:inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border text-xs font-mono font-medium transition-all active:scale-95 ${
-                isConfigured
-                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:border-emerald-400'
-                  : 'bg-amber-950/60 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:border-amber-400'
-              }`}
+              className="pill-badge hidden md:inline-flex items-center space-x-2 px-3 py-1 hover:brightness-110 transition-all cursor-pointer"
               title="Click to view or update OpenAI GPT-4o API Key"
             >
               <span
-                className={`w-2 h-2 rounded-full ${
-                  isConfigured ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                className={`status-dot ${
+                  isConfigured ? 'bg-[#5B8CFF] text-[#5B8CFF]' : 'bg-amber-400 text-amber-400'
                 }`}
               />
-              <Cpu className="w-3.5 h-3.5 opacity-80" />
-              <span>{isConfigured ? 'GPT-4o Model Active' : 'Connect OpenAI Key'}</span>
-              {maskedKey && <span className="text-[10px] opacity-75">({maskedKey})</span>}
+              <span className="font-mono text-[11px] font-medium tracking-wide">
+                {isConfigured ? 'GPT-4o ACTIVE' : 'CONNECT OPENAI'}
+              </span>
+              {maskedKey && <span className="text-[10px] text-[#9CA3AF] opacity-80">({maskedKey})</span>}
             </button>
 
-            <div className="h-5 w-px bg-white/10" />
+            {/* Glass Header Button: GitHub */}
+            <a
+              href="https://github.com/akhandpratap18/constella-quest-admin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-glass hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs text-[#9CA3AF] hover:text-white"
+            >
+              <Github className="w-3.5 h-3.5 text-[#6B7280]" />
+              <span className="font-mono text-[11px]">Repo</span>
+            </a>
 
-            {/* Admin Tag & Logout */}
-            <div className="flex items-center space-x-2 pl-1">
-              <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-950/60 border border-blue-800/40 text-blue-300 text-xs font-mono">
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                <span>Admin</span>
-              </div>
+            {/* Primary CTA Button */}
+            <Link
+              href="/dashboard/new"
+              className="btn-primary-cta inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-semibold text-white tracking-wide"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-white/90" />
+              <span>New Quest</span>
+            </Link>
 
-              <button
-                onClick={handleLogout}
-                title="Sign out of Admin Portal"
-                className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+            <div className="h-4 w-px bg-white/[0.08]" />
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              title="Sign out of Admin Portal"
+              className="btn-glass p-2 text-[#9CA3AF] hover:text-rose-400 hover:border-rose-500/30 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* OpenAI API Key Settings Modal */}
+      {/* OpenAI API Key Settings Modal (Dark Glass Panel) */}
       {isOpenAiModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-lg rounded-3xl bg-[#040816] border border-blue-500/40 p-6 sm:p-8 shadow-[0_0_50px_rgba(37,99,235,0.35)] space-y-6">
+          <div className="relative w-full max-w-lg glass-panel p-6 sm:p-8 space-y-6">
             <button
               onClick={() => setIsOpenAiModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-5 right-5 text-[#6B7280] hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-2">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-600/15 border border-blue-500/40 text-blue-300 text-xs font-mono font-medium">
-                <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-                <span>Model Intelligence Settings</span>
+              <div className="pill-badge inline-flex items-center space-x-2 px-3 py-1">
+                <KeyRound className="w-3 h-3 text-[#5B8CFF]" />
+                <span className="text-[11px] uppercase tracking-wider font-mono">Model Configuration</span>
               </div>
               <h3 className="text-xl font-bold text-white tracking-tight">
                 Connect OpenAI API Key
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connect your OpenAI key to have GPT-4o dynamically frame every astronomy quest question directly from your extracted Supabase discoveries, with brilliant writing and calibrated difficulty.
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Connect your OpenAI key to have GPT-4o dynamically frame every astronomy quest question directly from verified Supabase discoveries with calibrated difficulty curves.
               </p>
             </div>
 
             {isConfigured && (
-              <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Currently Active:</span>
-                  <span className="font-bold text-white">{maskedKey}</span>
+              <div className="glass-card-sm p-3.5 flex items-center justify-between border-emerald-500/30">
+                <div className="flex items-center space-x-2.5">
+                  <span className="status-dot bg-emerald-400 text-emerald-400" />
+                  <span className="text-xs text-[#9CA3AF] font-mono">Active Key:</span>
+                  <span className="font-mono text-xs font-semibold text-white">{maskedKey}</span>
                 </div>
-                <span className="text-[10px] bg-emerald-900/60 px-2 py-0.5 rounded-full border border-emerald-700/50">
-                  GPT-4o Ready
+                <span className="pill-badge px-2.5 py-0.5 text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-950/40">
+                  Ready
                 </span>
               </div>
             )}
 
             {keyError && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono">
+              <div className="glass-card-sm p-3.5 border-rose-500/30 text-rose-300 text-xs font-mono">
                 {keyError}
               </div>
             )}
 
             <form onSubmit={handleSaveKey} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 font-mono flex items-center justify-between">
-                  <span>OpenAI API Key (sk-...)</span>
-                  <span className="text-[10px] text-slate-500">Stored securely in .env.local</span>
+                <label className="text-xs font-mono uppercase tracking-wider text-[#6B7280] flex items-center justify-between">
+                  <span>OpenAI API Key</span>
+                  <span className="text-[10px] text-[#6B7280] normal-case">Stored in .env.local</span>
                 </label>
                 <input
                   type="password"
                   value={apiKeyInput}
                   onChange={(e) => setApiKeyInput(e.target.value)}
                   placeholder="sk-proj-..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/[0.1] focus:border-blue-500 text-white text-xs outline-none font-mono placeholder-zinc-600 transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] focus:border-[#5B8CFF] focus:ring-1 focus:ring-[#2F5BFF]/40 text-white text-xs outline-none font-mono placeholder-[#6B7280] transition-all"
                 />
               </div>
 
@@ -235,7 +251,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsOpenAiModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white transition-colors font-mono"
+                  className="btn-glass px-4 py-2 text-xs text-[#9CA3AF] hover:text-white font-mono"
                 >
                   Cancel
                 </button>
@@ -243,7 +259,7 @@ export default function Navbar() {
                 <button
                   type="submit"
                   disabled={isSavingKey || !apiKeyInput.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs font-mono shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+                  className="btn-primary-cta px-5 py-2 text-xs font-mono font-semibold flex items-center space-x-2 disabled:opacity-50"
                 >
                   {isSavingKey ? (
                     <>
@@ -252,13 +268,13 @@ export default function Navbar() {
                     </>
                   ) : keySaveSuccess ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                      <Check className="w-3.5 h-3.5 text-white" />
                       <span>Connected!</span>
                     </>
                   ) : (
                     <>
                       <KeyRound className="w-3.5 h-3.5 text-white" />
-                      <span>Save & Activate GPT-4o</span>
+                      <span>Save & Activate</span>
                     </>
                   )}
                 </button>
