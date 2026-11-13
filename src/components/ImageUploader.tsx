@@ -121,7 +121,7 @@ export default function ImageUploader({
         >
           {isUploading ? (
             <div className="flex flex-col items-center space-y-2">
-              <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+              <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
               <p className="text-xs text-blue-300 font-mono">Uploading to Supabase Storage...</p>
             </div>
           ) : (

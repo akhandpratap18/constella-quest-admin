@@ -44,16 +44,16 @@ export default function LoginPage() {
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-600/20 rounded-full blur-[90px] pointer-events-none" />
 
         {/* Glassmorphic Login Card */}
-        <div className="relative rounded-3xl bg-[#080e1c]/85 backdrop-blur-2xl border border-white/[0.08] p-7 sm:p-9 shadow-glass-card hover:border-blue-500/40 transition-all duration-500">
+        <div className="relative rounded-3xl bg-[#040816]/90 backdrop-blur-2xl border border-white/[0.08] p-7 sm:p-9 shadow-glass-card hover:border-blue-500/50 transition-all duration-500">
           {/* Logo & Header */}
           <div className="flex flex-col items-center text-center space-y-3 mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 flex items-center justify-center shadow-[0_0_35px_rgba(37,99,235,0.5)]">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 flex items-center justify-center shadow-[0_0_35px_rgba(37,99,235,0.55)]">
               <Compass className="w-8 h-8 text-white" />
             </div>
 
             <div className="space-y-1">
-              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-mono font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-600/15 border border-blue-500/40 text-blue-300 text-xs font-mono font-medium shadow-[0_0_15px_rgba(37,99,235,0.25)]">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                 <span>AI Quest Command Center</span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-white">Constella Admin</h1>

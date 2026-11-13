@@ -5,44 +5,44 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 241, 245, 249;
-  --background-start-rgb: 3, 7, 18;
-  --background-end-rgb: 2, 5, 15;
+  --foreground-rgb: 248, 250, 252;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 2, 4, 12;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #030712;
+  background: #000000;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.015em;
 }
 
-/* Custom Constella navy scrollbar */
+/* Custom Constella Royal Navy scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(37, 99, 235, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.6);
+  background: rgba(37, 99, 235, 0.65);
 }
 
-/* Cross marker utility for AstSurgeon grid intersections */
+/* Subtle cross marker utility for grid intersections */
 .tech-cross {
   position: absolute;
   width: 9px;
   height: 9px;
-  color: rgba(255, 255, 255, 0.15);
+  color: rgba(59, 130, 246, 0.25);
   pointer-events: none;
   user-select: none;
   font-family: monospace;

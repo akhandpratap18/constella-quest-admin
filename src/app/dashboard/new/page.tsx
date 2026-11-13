@@ -287,8 +287,8 @@ export default function NewQuestPage() {
         {!generatedQuest ? (
           <div className="space-y-6">
             <div className="space-y-1">
-              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-mono font-medium">
-                <Compass className="w-3.5 h-3.5 text-sky-400" />
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-600/15 border border-blue-500/40 text-blue-300 text-xs font-mono font-medium shadow-[0_0_15px_rgba(37,99,235,0.25)]">
+                <Compass className="w-3.5 h-3.5 text-blue-400" />
                 <span>Deterministic Multi-Topic Synthesis</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -306,7 +306,7 @@ export default function NewQuestPage() {
             )}
 
             {/* Scope Card */}
-            <div className="rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-glass-card space-y-6">
+            <div className="rounded-3xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-glass-card hover:border-blue-500/30 transition-all space-y-6">
               
               {/* Category Filter Pills & Search Bar */}
               <div className="space-y-3">
@@ -319,10 +319,10 @@ export default function NewQuestPage() {
                   <button
                     type="button"
                     onClick={handlePickPopularMix}
-                    className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/60 border border-blue-500/30 text-blue-300 text-xs font-mono transition-colors self-start sm:self-auto"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 border border-blue-500/40 text-blue-200 text-xs font-mono transition-colors self-start sm:self-auto shadow-sm"
                     title="Pre-select Mars, Andromeda, and Triangulum"
                   >
-                    <Shuffle className="w-3 h-3 text-sky-400" />
+                    <Shuffle className="w-3 h-3 text-blue-400" />
                     <span>Preset: Mars + Andromeda + Triangulum</span>
                   </button>
                 </div>
@@ -335,8 +335,8 @@ export default function NewQuestPage() {
                       onClick={() => setActiveFilterTab('ALL')}
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
                         activeFilterTab === 'ALL'
-                          ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]'
-                          : 'bg-black/40 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/30'
+                          ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.45)]'
+                          : 'bg-black/50 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/40'
                       }`}
                     >
                       <Globe2 className="w-3.5 h-3.5" />
@@ -351,8 +351,8 @@ export default function NewQuestPage() {
                         onClick={() => setActiveFilterTab(cat.name)}
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
                           activeFilterTab === cat.name
-                            ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]'
-                            : 'bg-black/40 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/30'
+                            ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.45)]'
+                            : 'bg-black/50 text-slate-400 hover:text-white border border-white/[0.08] hover:border-blue-500/40'
                         }`}
                       >
                         <span>{cat.name}</span>
@@ -365,8 +365,8 @@ export default function NewQuestPage() {
                       onClick={() => setActiveFilterTab('SELECTED')}
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 font-mono ${
                         activeFilterTab === 'SELECTED'
-                          ? 'bg-sky-500 text-black font-bold shadow-[0_0_15px_rgba(56,189,248,0.5)]'
-                          : 'bg-blue-950/40 text-sky-300 border border-blue-500/30 hover:border-blue-400'
+                          ? 'bg-blue-600 text-white font-bold shadow-[0_0_20px_rgba(37,99,235,0.55)]'
+                          : 'bg-blue-950/60 text-blue-300 border border-blue-500/40 hover:border-blue-400'
                       }`}
                     >
                       <span>Selected Mix</span>
@@ -384,7 +384,7 @@ export default function NewQuestPage() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search Mars, Andromeda..."
-                      className="w-full pl-9 pr-8 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-white text-xs outline-none transition-all placeholder-slate-500 font-mono"
+                      className="w-full pl-9 pr-8 py-2 rounded-xl bg-black/60 border border-white/[0.08] focus:border-blue-500 text-white text-xs outline-none transition-all placeholder-slate-500 font-mono"
                     />
                     {searchQuery && (
                       <button
@@ -400,13 +400,13 @@ export default function NewQuestPage() {
               </div>
 
               {/* Selected Mix Chips Drawer */}
-              <div className="p-4 rounded-2xl bg-[#050b18]/90 border border-blue-500/25 space-y-2.5 shadow-sm">
+              <div className="p-4 rounded-2xl bg-[#030612]/95 border border-blue-500/30 space-y-2.5 shadow-[0_0_20px_rgba(37,99,235,0.15)]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
                       Selected Mix ({selectedItems.length})
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[10px] font-mono">
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-300 text-[10px] font-mono shadow-sm">
                       {effectiveCategory}
                     </span>
                   </div>
@@ -415,7 +415,7 @@ export default function NewQuestPage() {
                     <button
                       type="button"
                       onClick={handleSelectAllFiltered}
-                      className="text-blue-400 hover:text-sky-300 transition-colors"
+                      className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
                     >
                       Select All in View
                     </button>
@@ -439,10 +439,10 @@ export default function NewQuestPage() {
                     {selectedItems.map((obj) => (
                       <div
                         key={obj.id}
-                        className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-blue-600/20 border border-blue-400/50 text-white text-xs font-medium shadow-[0_0_12px_rgba(37,99,235,0.2)] transition-all"
+                        className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-blue-600/20 border border-blue-500/50 text-white text-xs font-medium shadow-[0_0_12px_rgba(37,99,235,0.25)] transition-all"
                       >
                         <span className="font-semibold">{obj.name}</span>
-                        <span className="text-[10px] font-mono text-blue-300 opacity-80 px-1 py-0.5 rounded bg-blue-900/60">
+                        <span className="text-[10px] font-mono text-blue-300 px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-800/40">
                           {obj.category}
                         </span>
                         <button
@@ -468,7 +468,7 @@ export default function NewQuestPage() {
 
                 {isLoadingCategories ? (
                   <div className="py-12 flex flex-col items-center justify-center space-y-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-sky-400" />
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
                     <p className="text-xs text-slate-400 font-mono">Loading celestial database...</p>
                   </div>
                 ) : filteredObjects.length === 0 ? (
@@ -485,15 +485,15 @@ export default function NewQuestPage() {
                           onClick={() => handleToggleObject(obj.id)}
                           className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center space-x-2.5 ${
                             isSelected
-                              ? 'bg-blue-600/15 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.25)]'
-                              : 'bg-black/40 border-white/[0.06] text-slate-400 hover:border-blue-500/30 hover:text-slate-200'
+                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-[0_0_18px_rgba(37,99,235,0.3)]'
+                              : 'bg-black/50 border-white/[0.06] text-slate-400 hover:border-blue-500/30 hover:text-slate-200'
                           }`}
                         >
                           <div
                             className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all ${
                               isSelected
-                                ? 'bg-blue-600 border-blue-400 text-white'
-                                : 'border-slate-700 bg-black/40'
+                                ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_8px_rgba(37,99,235,0.5)]'
+                                : 'border-slate-700 bg-black/50'
                             }`}
                           >
                             {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -501,7 +501,7 @@ export default function NewQuestPage() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-1">
                               <p className="text-xs font-semibold truncate text-white">{obj.name}</p>
-                              <span className="text-[9px] font-mono text-blue-400/80 px-1 py-0.2 rounded bg-black/40 shrink-0">
+                              <span className="text-[9px] font-mono text-blue-400 px-1 py-0.2 rounded bg-black/60 border border-blue-900/40 shrink-0">
                                 {obj.category}
                               </span>
                             </div>
@@ -527,7 +527,7 @@ export default function NewQuestPage() {
                   <select
                     value={questionCount}
                     onChange={(e) => setQuestionCount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] text-white text-sm focus:border-blue-400 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] text-white text-sm focus:border-blue-500 outline-none"
                   >
                     <option value={3}>3 Questions (Quick Quiz)</option>
                     <option value={5}>5 Questions (Standard Weekly)</option>
@@ -545,7 +545,7 @@ export default function NewQuestPage() {
                   <select
                     value={durationMinutes}
                     onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] text-white text-sm focus:border-blue-400 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] text-white text-sm focus:border-blue-500 outline-none"
                   >
                     <option value={5}>~ 5 minutes</option>
                     <option value={8}>~ 8 minutes</option>
@@ -565,7 +565,7 @@ export default function NewQuestPage() {
                     type="date"
                     value={targetDate}
                     onChange={(e) => setTargetDate(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/[0.08] text-white text-sm focus:border-blue-400 outline-none font-mono"
+                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white text-sm focus:border-blue-500 outline-none font-mono"
                   />
                 </div>
               </div>
@@ -576,7 +576,7 @@ export default function NewQuestPage() {
                   type="button"
                   disabled={isGenerating || selectedObjectIds.length === 0}
                   onClick={handleGenerate}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_30px_rgba(37,99,235,0.45)] hover:shadow-[0_0_40px_rgba(37,99,235,0.65)] transition-all flex items-center justify-center space-x-2.5 active:scale-95 disabled:opacity-50"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:shadow-[0_0_40px_rgba(37,99,235,0.7)] transition-all flex items-center justify-center space-x-2.5 active:scale-95 disabled:opacity-50"
                 >
                   {isGenerating ? (
                     <>
@@ -585,7 +585,7 @@ export default function NewQuestPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-blue-200" />
+                      <Sparkles className="w-4 h-4 text-white" />
                       <span>Synthesize Quest for {selectedItems.length} Entities</span>
                     </>
                   )}
@@ -597,10 +597,10 @@ export default function NewQuestPage() {
           /* Step 2: Interactive Review & Single-Question Refresh Canvas */
           <div className="space-y-8">
             {/* Header with Publish Action */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#080e1c]/90 backdrop-blur-xl border border-white/[0.08] shadow-glass-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] shadow-glass-card hover:border-blue-500/40 transition-all">
               <div className="space-y-1">
-                <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-200 font-mono text-xs border border-blue-500/30">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-600/15 text-blue-200 font-mono text-xs border border-blue-500/40 shadow-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
                   <span>AI Quest Generated · Multi-Topic Synthesis Ready</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
@@ -624,7 +624,7 @@ export default function NewQuestPage() {
                   type="button"
                   disabled={isPublishing || publishSuccess}
                   onClick={handlePublish}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(37,99,235,0.45)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(37,99,235,0.5)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
                 >
                   {isPublishing ? (
                     <>
@@ -655,7 +655,7 @@ export default function NewQuestPage() {
             {/* Quest Metadata & Hero Image Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column: Image Upload Card */}
-              <div className="lg:col-span-1 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-5 shadow-glass-card">
+              <div className="lg:col-span-1 rounded-3xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] p-5 shadow-glass-card hover:border-blue-500/40 transition-all">
                 <ImageUploader
                   currentImageUrl={generatedQuest.imageUrl}
                   defaultFallbackUrl={defaultArtworkUrl}
@@ -664,7 +664,7 @@ export default function NewQuestPage() {
               </div>
 
               {/* Right Column: Title, Description, Dates */}
-              <div className="lg:col-span-2 rounded-3xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] p-6 shadow-glass-card space-y-4">
+              <div className="lg:col-span-2 rounded-3xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] p-6 shadow-glass-card hover:border-blue-500/40 transition-all space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold uppercase tracking-wider text-blue-400 font-mono">
                     Quest Title (AI Synthesized)
@@ -673,7 +673,7 @@ export default function NewQuestPage() {
                     type="text"
                     value={generatedQuest.title}
                     onChange={(e) => setGeneratedQuest({ ...generatedQuest, title: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-white font-bold text-base outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] focus:border-blue-500 text-white font-bold text-base outline-none"
                   />
                 </div>
 
@@ -687,7 +687,7 @@ export default function NewQuestPage() {
                     onChange={(e) =>
                       setGeneratedQuest({ ...generatedQuest, description: e.target.value })
                     }
-                    className="w-full px-4 py-2 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 text-slate-300 text-xs outline-none resize-none leading-relaxed"
+                    className="w-full px-4 py-2 rounded-xl bg-black/60 border border-white/[0.08] focus:border-blue-500 text-slate-300 text-xs outline-none resize-none leading-relaxed"
                   />
                 </div>
 
@@ -701,7 +701,7 @@ export default function NewQuestPage() {
                       onChange={(e) =>
                         setGeneratedQuest({ ...generatedQuest, weekNumber: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/[0.08] text-white text-xs font-mono"
                     />
                   </div>
 
@@ -713,7 +713,7 @@ export default function NewQuestPage() {
                       onChange={(e) =>
                         setGeneratedQuest({ ...generatedQuest, dateRangeString: e.target.value })
                       }
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/[0.08] text-white text-xs font-mono"
                     />
                   </div>
 
@@ -725,7 +725,7 @@ export default function NewQuestPage() {
                       onChange={(e) =>
                         setGeneratedQuest({ ...generatedQuest, durationString: e.target.value })
                       }
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/[0.08] text-white text-xs font-mono"
                     />
                   </div>
 
@@ -739,7 +739,7 @@ export default function NewQuestPage() {
                           status: e.target.value as 'Active' | 'Upcoming' | 'Completed',
                         })
                       }
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.08] text-white text-xs font-mono outline-none"
+                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/[0.08] text-white text-xs font-mono outline-none"
                     >
                       <option value="Upcoming">Upcoming</option>
                       <option value="Active">Active (Live in App)</option>
@@ -755,7 +755,7 @@ export default function NewQuestPage() {
               <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                 <div className="flex items-center space-x-2">
                   <h3 className="text-lg font-bold text-white tracking-tight">Synthesized Quest Questions</h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-mono text-xs border border-blue-500/30">
+                  <span className="px-3 py-0.5 rounded-full bg-blue-600/20 text-blue-300 font-mono text-xs border border-blue-500/40 shadow-sm">
                     {generatedQuest.questions.length} Items · Distinct Archetypes
                   </span>
                 </div>
@@ -763,7 +763,7 @@ export default function NewQuestPage() {
                 <button
                   type="button"
                   onClick={handleAddBlankQuestion}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.1] hover:border-blue-500/40 text-blue-300 hover:text-white text-xs font-medium transition-colors"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/50 border border-white/[0.1] hover:border-blue-500/50 text-blue-300 hover:text-white text-xs font-medium transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Manual Question</span>
@@ -789,9 +789,9 @@ export default function NewQuestPage() {
             </div>
 
             {/* Bottom Floating Publish Bar */}
-            <div className="sticky bottom-6 z-40 p-4 rounded-2xl bg-[#040816]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(37,99,235,0.3)] flex items-center justify-between">
+            <div className="sticky bottom-6 z-40 p-4 rounded-2xl bg-[#030612]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.9),0_0_30px_rgba(37,99,235,0.35)] flex items-center justify-between">
               <div className="flex items-center space-x-2 text-xs text-slate-300 font-mono">
-                <Sparkles className="w-4 h-4 text-sky-400" />
+                <Sparkles className="w-4 h-4 text-blue-400" />
                 <span>
                   All {generatedQuest.questions.length} questions are verified and ready for publication.
                 </span>
@@ -801,7 +801,7 @@ export default function NewQuestPage() {
                 type="button"
                 disabled={isPublishing || publishSuccess}
                 onClick={handlePublish}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.55)] transition-all flex items-center space-x-2 active:scale-95 disabled:opacity-50"
               >
                 {isPublishing ? (
                   <>

@@ -84,17 +84,17 @@ export default function QuestionEditorCard({
   };
 
   return (
-    <div className="relative rounded-2xl bg-[#080e1c]/85 backdrop-blur-xl border border-white/[0.08] hover:border-blue-500/40 p-5 sm:p-6 shadow-glass-card hover:shadow-glass-card-hover transition-all duration-300 group">
+    <div className="relative rounded-2xl bg-[#040816]/90 backdrop-blur-xl border border-white/[0.08] hover:border-blue-500/50 p-5 sm:p-6 shadow-glass-card hover:shadow-glass-card-hover transition-all duration-300 group">
       {/* Question Header & Refresh Action */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.08] mb-4">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center font-mono font-bold text-xs text-blue-300 shadow-sm">
+          <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center font-mono font-bold text-xs text-blue-300 shadow-[0_0_12px_rgba(37,99,235,0.3)]">
             {index + 1}
           </div>
           
           {/* Question Archetype Badge (Ensures each question is uniquely framed) */}
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-950/70 border border-blue-500/30 text-blue-300 font-mono text-[11px] font-medium tracking-wide">
-            <Compass className="w-3 h-3 text-sky-400" />
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-500/40 text-blue-300 font-mono text-[11px] font-medium tracking-wide shadow-sm">
+            <Compass className="w-3 h-3 text-blue-400" />
             <span>{currentArchetype}</span>
           </div>
         </div>
@@ -105,12 +105,12 @@ export default function QuestionEditorCard({
             type="button"
             disabled={isRefreshing}
             onClick={handleRefreshThisQuestion}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/60 text-blue-300 text-xs font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 border border-blue-500/40 hover:border-blue-400 text-blue-200 text-xs font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
             title="Use AI to generate a brand new unique question for this card"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-400' : ''}`} />
             <span>{isRefreshing ? 'AI Synthesizing...' : 'Refresh Question'}</span>
-            <Sparkles className="w-3 h-3 text-sky-400 opacity-80" />
+            <Sparkles className="w-3 h-3 text-blue-400 opacity-80" />
           </button>
 
           <button
@@ -137,7 +137,7 @@ export default function QuestionEditorCard({
           value={question.text}
           onChange={(e) => handleTextChange('text', e.target.value)}
           placeholder="Enter question text..."
-          className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/[0.08] focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 text-white text-sm font-medium transition-all placeholder-zinc-600 resize-none outline-none leading-relaxed"
+          className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/[0.08] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 text-white text-sm font-medium transition-all placeholder-zinc-600 resize-none outline-none leading-relaxed"
         />
       </div>
 
@@ -156,12 +156,12 @@ export default function QuestionEditorCard({
               onClick={() => handleSelectCorrectOption(optIdx)}
               className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer ${
                 opt.isCorrect
-                  ? 'bg-blue-600/15 border-blue-400/70 shadow-[0_0_15px_rgba(37,99,235,0.25)] text-white'
-                  : 'bg-black/40 border-white/[0.06] hover:border-blue-500/30 text-slate-300'
+                  ? 'bg-blue-600/20 border-blue-500/70 shadow-[0_0_20px_rgba(37,99,235,0.35)] text-white'
+                  : 'bg-black/50 border-white/[0.06] hover:border-blue-500/30 text-slate-300'
               }`}
             >
               {opt.isCorrect ? (
-                <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
               ) : (
                 <Circle className="w-4 h-4 text-slate-600 shrink-0" />
               )}
@@ -185,7 +185,7 @@ export default function QuestionEditorCard({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-white/[0.08]">
         <div className="space-y-1">
           <label className="text-[11px] font-medium text-blue-300/90 flex items-center space-x-1.5 font-mono">
-            <HelpCircle className="w-3 h-3 text-sky-400" />
+            <HelpCircle className="w-3 h-3 text-blue-400" />
             <span>Astrophysical Explanation (Post-Quiz Review)</span>
           </label>
           <textarea
@@ -193,13 +193,13 @@ export default function QuestionEditorCard({
             value={question.explanation}
             onChange={(e) => handleTextChange('explanation', e.target.value)}
             placeholder="Scientific reason why this answer is correct..."
-            className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/[0.08] focus:border-blue-400 text-xs text-slate-300 placeholder-zinc-600 resize-none outline-none leading-relaxed"
+            className="w-full px-3 py-2 rounded-lg bg-black/60 border border-white/[0.08] focus:border-blue-500 text-xs text-slate-300 placeholder-zinc-600 resize-none outline-none leading-relaxed"
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-[11px] font-medium text-blue-300/90 flex items-center space-x-1.5 font-mono">
-            <Lightbulb className="w-3 h-3 text-sky-400" />
+            <Lightbulb className="w-3 h-3 text-blue-400" />
             <span>Curiosity / Trivia Fact</span>
           </label>
           <textarea
@@ -207,7 +207,7 @@ export default function QuestionEditorCard({
             value={question.interestingFact}
             onChange={(e) => handleTextChange('interestingFact', e.target.value)}
             placeholder="Fascinating cosmic trivia..."
-            className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/[0.08] focus:border-blue-400 text-xs text-slate-300 placeholder-zinc-600 resize-none outline-none leading-relaxed"
+            className="w-full px-3 py-2 rounded-lg bg-black/60 border border-white/[0.08] focus:border-blue-500 text-xs text-slate-300 placeholder-zinc-600 resize-none outline-none leading-relaxed"
           />
         </div>
       </div>

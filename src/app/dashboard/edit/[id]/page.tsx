@@ -112,7 +112,7 @@ export default function EditQuestPage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
           <p className="text-sm text-slate-400 font-mono">Loading Quest from Supabase...</p>
         </div>
       </div>
